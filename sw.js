@@ -38,11 +38,11 @@ self.addEventListener('fetch', (event) => {
 
   /* Always go to network for Azure AI and Supabase API calls */
   if (
-    url.hostname.includes('openai.azure.com') ||
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('supabase.in') ||
-    url.pathname.includes('/openai/') ||
-    url.pathname.includes('/rest/v1/')
+    url.hostname.endsWith('.openai.azure.com') ||
+    url.hostname.endsWith('.supabase.co') ||
+    url.hostname.endsWith('.supabase.in') ||
+    url.pathname.startsWith('/openai/') ||
+    url.pathname.startsWith('/rest/v1/')
   ) {
     event.respondWith(fetch(event.request));
     return;
