@@ -3088,7 +3088,7 @@ async function askAzureSoma() {
   const el = document.getElementById('soma-azure-response');
   el.textContent = 'Thinking...';
   const cap = ls('saaleh_os_capacity', {});
-  const symptoms = ls('saaleh_os_symptoms_' + todayStr(), []);
+  const symptoms = ls('saaleh_os_symptoms', []);
   const prompt = `My capacity today: pain ${cap.pain || '?'}/10, fatigue ${cap.fatigue || '?'}/10, brain fog ${cap.brain_fog || '?'}/10. Mode: ${cap.mode || 'unknown'}. Active symptoms: ${symptoms.join(', ') || 'none flagged'}. What gentle, capacity-adapted practices would you suggest for my body right now?`;
   el.textContent = await askAzure(prompt, 'You are advising on physical self-care for someone with POTS, ME/CFS, fibromyalgia. Never suggest pushing through. Rest is always valid.');
 }
@@ -3099,7 +3099,7 @@ async function askAzureFletcher() {
   const masking = ls('saaleh_os_masking', {});
   const projects = ls('saaleh_os_projects', []);
   const highEnergy = projects.filter(p => p.energy === 'high').length;
-  const prompt = `I have ${projects.length} active projects (${highEnergy} high-energy). Masking hours today: ${masking.hours || 0}. Decompression scheduled: ${masking.decompression ? 'yes' : 'no'}. Is Fletcher (my perfectionist/overachiever part) driving right now? What would Iroh notice?`;
+  const prompt = `I have ${projects.length} active projects (${highEnergy} high-energy). Masking hours today: ${masking.hours || 0}. Decompression scheduled: ${masking.decomp ? 'yes' : 'no'}. Is Fletcher (my perfectionist/overachiever part) driving right now? What would Iroh notice?`;
   el.textContent = await askAzure(prompt, 'Detect whether the user\'s perfectionist "Fletcher" part is overdriving. Be compassionate. Name what you see without shaming.');
 }
 
@@ -3108,7 +3108,7 @@ async function askAzureNidal() {
   el.textContent = 'Thinking...';
   const data = ls('saaleh_os_nidal_data', {});
   const positions = ls('saaleh_os_line_positions', []);
-  const posText = positions.map(p => p.text || p).join('; ');
+  const posText = positions.join('; ');
   const prompt = `My current settled line positions: ${posText || '(none recorded)'}. My study focus: ${data.focus || 'Workers Guide'}. Current theoretical question: ${data.workersQ || '(none)'}. Steelman the strongest opposing argument to my current positions. Help me sharpen my analysis without abandoning principled positions.`;
   el.textContent = await askAzure(prompt, 'You are a dialectical sparring partner for Marxist-Leninist political education. Steelman opposing positions rigorously and honestly. Never patronise. Never centrist-wash.');
 }
