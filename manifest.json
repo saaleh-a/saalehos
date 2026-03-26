@@ -1,0 +1,19 @@
+{
+  "name": "Saaleh OS",
+  "short_name": "SaalehOS",
+  "description": "Capacity-first daily operating system for an AuDHD Muslim.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0d1117",
+  "background_color": "#0d1117",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d1117'/><text x='50' y='62' font-size='48' text-anchor='middle' fill='%23f59e0b'>ص</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "health", "lifestyle"]
+}
