@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saaleh OS</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0d1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS & RESET
+    ============================================================ */
+    :root {
+      --base:        #0d1117;
+      --amber:       #f59e0b;
+      --terracotta:  #c2674a;
+      --gold:        #d4a843;
+      --text:        #f0ead6;
+      --muted:       #8b9bb4;
+      --sage:        #6b7c5c;
+      --teal:        #0f4c5c;
+      --lavender:    #6b5b8a;
+      --surface:     #161b22;
+      --surface2:    #1c2330;
+      --border:      #2a3441;
+      --font-body:   'Atkinson Hyperlegible', sans-serif;
+      --font-amiri:  'Amiri', serif;
+      --transition:  opacity 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; background: var(--base); color: var(--text); }
+
+    body {
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: var(--base);
+    }
+
+    /* ============================================================
+       UTILITY CLASSES
+    ============================================================ */
+    .hidden      { display: none !important; }
+    .fade-in     { animation: fadeIn 150ms ease forwards; }
+    .fade-out    { animation: fadeOut 150ms ease forwards; }
+    .amiri       { font-family: var(--font-amiri); }
+    .italic      { font-style: italic; }
+    .muted       { color: var(--muted); }
+    .gold        { color: var(--gold); }
+    .amber       { color: var(--amber); }
+
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ============================================================
+       BUTTONS — global base, min 44px tap target
+    ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      line-height: 1.3;
+    }
+    .btn:hover, .btn:focus-visible { border-color: var(--amber); outline: none; }
+    .btn.active, .btn.selected {
+      background: var(--amber);
+      color: var(--base);
+      border-color: var(--amber);
+    }
+    .btn-primary {
+      background: var(--amber);
+      color: var(--base);
+      border-color: var(--amber);
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: var(--amber); color: var(--text); }
+    .btn-lg {
+      min-height: 60px;
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      border-radius: 10px;
+    }
+    .btn-full { width: 100%; }
+    .btn-danger-soft { border-color: var(--terracotta); color: var(--terracotta); background: transparent; }
+
+    /* ============================================================
+       FORM ELEMENTS
+    ============================================================ */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: border-color 120ms ease;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select:focus { border-color: var(--amber); }
+    textarea { resize: vertical; min-height: 80px; }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--amber);
+      height: 6px;
+      cursor: pointer;
+    }
+    label { font-size: 0.9rem; color: var(--muted); display: block; margin-bottom: 6px; }
+
+    /* ============================================================
+       CARDS / SECTIONS
+    ============================================================ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .section-q {
+      font-family: var(--font-amiri);
+      font-style: italic;
+      color: var(--muted);
+      font-size: 1rem;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* ============================================================
+       BOOT SEQUENCE OVERLAY
+    ============================================================ */
+    #boot-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--base);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .boot-step {
+      width: 100%;
+      max-width: 540px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .boot-step.active { display: flex; }
+    .boot-step-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-align: center;
+    }
+    .boot-step-title {
+      font-family: var(--font-amiri);
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 700;
+      text-align: center;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .boot-mode-display {
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 700;
+      text-align: center;
+      color: var(--amber);
+      line-height: 1;
+    }
+    .boot-mode-desc {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .iroh-question-display {
+      font-family: var(--font-amiri);
+      font-style: italic;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      text-align: center;
+      color: var(--gold);
+      line-height: 1.5;
+      padding: 20px 0;
+    }
+    .niyyah-display {
+      font-family: var(--font-amiri);
+      font-size: clamp(1.2rem, 4vw, 1.7rem);
+      text-align: center;
+      color: var(--gold);
+      line-height: 1.6;
+      padding: 20px 0;
+    }
+    .countdown-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .slider-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--amber);
+      min-width: 2ch;
+      text-align: right;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .capacity-preview {
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .capacity-preview .mode-label {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--amber);
+    }
+    .part-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .part-btn {
+      min-height: 60px;
+      font-size: 1rem;
+    }
+    .frodo-audit {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .frodo-audit p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    .sentence-warning {
+      color: var(--gold);
+      font-size: 0.85rem;
+      font-style: italic;
+      padding: 8px;
+      border-left: 2px solid var(--gold);
+      padding-left: 12px;
+    }
+
+    /* ============================================================
+       ALWAYS-VISIBLE TOP BAR
+    ============================================================ */
+    #app { display: none; flex-direction: column; min-height: 100vh; }
+    #app.visible { display: flex; }
+
+    #top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--base);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .capacity-dial-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .capacity-dial {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+    }
+    .capacity-dial svg { width: 60px; height: 60px; }
+    .dial-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.45rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text);
+      padding: 4px;
+      line-height: 1.2;
+    }
+    .top-iroh-q {
+      font-family: var(--font-amiri);
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 8px;
+      max-width: 600px;
+    }
+
+    /* ============================================================
+       TAB NAVIGATION
+    ============================================================ */
+    #tab-nav {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+      background: var(--base);
+      -webkit-overflow-scrolling: touch;
+    }
+    #tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex: 0 0 auto;
+      min-height: 44px;
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+    .tab-btn.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+    }
+    .tab-btn:hover { color: var(--text); }
+
+    /* ============================================================
+       TAB CONTENT PANELS
+    ============================================================ */
+    #tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 80px;
+      max-width: 700px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 120ms ease; }
+    .tab-header {
+      font-family: var(--font-amiri);
+      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 20px;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    /* ============================================================
+       FLOATING JOURNAL BUTTON
+    ============================================================ */
+    #journal-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--amber);
+      color: var(--base);
+      font-size: 1.4rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+    #journal-fab:hover { opacity: 0.9; transform: scale(1.05); }
+
+    /* ============================================================
+       JOURNAL OVERLAY
+    ============================================================ */
+    #journal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--base);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 14px;
+      overflow-y: auto;
+    }
+    #journal-overlay.hidden { display: none; }
+    .journal-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .journal-title {
+      font-family: var(--font-amiri);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .parts-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .part-tag {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      min-height: 36px;
+      transition: var(--transition);
+    }
+    .part-tag.selected {
+      background: var(--amber);
+      color: var(--base);
+      border-color: var(--amber);
+    }
+    #journal-textarea {
+      flex: 1;
+      min-height: 260px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      resize: none;
+      outline: none;
+    }
+    #journal-textarea:focus { border-color: var(--amber); }
+    .journal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* ============================================================
+       SOMA TAB — capacity dial large, symptom toggles, etc.
+    ============================================================ */
+    .soma-dial-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .soma-dial {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+    .soma-dial svg { width: 120px; height: 120px; }
+    .soma-dial-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text);
+      padding: 8px;
+      line-height: 1.3;
+    }
+    .reading-row {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .reading-item {
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 10px;
+      flex: 1;
+    }
+    .reading-item .val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+    }
+    .reading-item .lbl {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .mode-banner {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .mode-banner .mode-word {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .mode-banner .mode-sentence {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .symptom-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .symptom-btn {
+      min-height: 48px;
+      font-size: 0.88rem;
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .practice-card {
+      background: var(--surface2);
+      border-left: 3px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .rest-log-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 56px;
+      width: 100%;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .rest-log-btn.logged { border-color: var(--sage); color: var(--sage); }
+    .rest-log-btn:hover { border-color: var(--amber); }
+
+    /* ============================================================
+       AQEEDAH TAB — salah circles
+    ============================================================ */
+    .salah-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .salah-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .salah-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .salah-circle.offered {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .salah-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .salah-dispensation {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      opacity: 0.8;
+    }
+    .weekly-view {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .weekly-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .weekly-day-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .weekly-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+    }
+    .weekly-circle.offered { background: var(--gold); border-color: var(--gold); }
+    .quran-btns {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .quran-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .dhikr-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dhikr-btn {
+      min-height: 52px;
+      font-size: 0.95rem;
+    }
+
+    /* ============================================================
+       AQL TAB
+    ============================================================ */
+    .one-thing-display {
+      font-family: var(--font-amiri);
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      color: var(--gold);
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      line-height: 1.5;
+      min-height: 60px;
+    }
+    .source-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .energy-toggle {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .energy-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 32px;
+    }
+    .energy-btn.selected { border-color: var(--amber); color: var(--amber); }
+    .project-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .project-item-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .project-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.95rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    .frodo-warning {
+      background: var(--surface2);
+      border-left: 3px solid var(--gold);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    .masking-warning {
+      background: var(--surface2);
+      border-left: 3px solid var(--terracotta);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--terracotta);
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    /* ============================================================
+       NIDAL TAB
+    ============================================================ */
+    .organising-item,
+    .line-position-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .organising-item input,
+    .line-position-item input { flex: 1; }
+    .persistent-note {
+      font-size: 0.82rem;
+      color: var(--teal);
+      font-style: italic;
+      padding: 8px 12px;
+      border: 1px solid var(--teal);
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+    .study-log-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* ============================================================
+       WAQT TAB — phase bands
+    ============================================================ */
+    .phase-band {
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      transition: opacity 120ms ease;
+    }
+    .phase-band.dim { opacity: 0.35; }
+    .phase-band.deviation { opacity: 0.5; }
+    .phase-1-band { background: color-mix(in srgb, var(--teal) 30%, var(--surface)); border-color: var(--teal); }
+    .phase-2-band { background: color-mix(in srgb, var(--amber) 10%, var(--surface)); border-color: color-mix(in srgb, var(--amber) 30%, var(--border)); }
+    .phase-3-band { background: color-mix(in srgb, var(--lavender) 10%, var(--surface)); border-color: color-mix(in srgb, var(--lavender) 30%, var(--border)); }
+    .phase-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .phase-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .phase-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
+    .phase-anchor input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      padding: 6px 2px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .phase-anchor input:focus { border-bottom-color: var(--amber); outline: none; }
+    .football-lens-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .deviation-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 16px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--surface2);
+      border-radius: 28px;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: background 120ms ease;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: left 120ms ease, background 120ms ease;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: color-mix(in srgb, var(--sage) 40%, var(--surface)); border-color: var(--sage); }
+    .toggle-switch input:checked + .toggle-slider::before { left: calc(100% - 23px); background: var(--sage); }
+    .toggle-label { font-size: 0.9rem; color: var(--muted); line-height: 1.4; }
+    .toggle-label strong { color: var(--text); }
+
+    /* ============================================================
+       UPDATE SLIDERS MODAL
+    ============================================================ */
+    #update-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,17,23,0.9);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #update-modal.hidden { display: none; }
+    .update-modal-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ============================================================
+       NOTEBOOK INTELLIGENCE CARDS
+    ============================================================ */
+    .insight-card {
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid #f59e0b;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .insight-label {
+      font-size: 11px;
+      color: #8b9bb4;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .insight-title {
+      font-family: 'Amiri', serif;
+      font-size: 16px;
+      color: #d4a843;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .insight-idea {
+      font-size: 14px;
+      color: #f0ead6;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .insight-question {
+      font-family: 'Amiri', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: #f59e0b;
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (min-width: 600px) {
+      .part-grid { grid-template-columns: repeat(3, 1fr); }
+      .symptom-grid { grid-template-columns: repeat(3, 1fr); }
+      .salah-grid { gap: 12px; }
+      .salah-circle { width: 56px; height: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     BOOT SEQUENCE OVERLAY
+================================================================ -->
+<div id="boot-overlay">
+
+  <!-- STEP 1: BAYMAX CHECK -->
+  <div class="boot-step" id="step-1">
+    <div class="boot-step-label">Step 1 of 6</div>
+    <div class="boot-step-title">What is the body carrying today?</div>
+
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);font-size:0.95rem;">Pain</span>
+        <span class="slider-value" id="pain-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="pain-slider" oninput="updateSlider('pain')" />
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);font-size:0.95rem;">Fatigue</span>
+        <span class="slider-value" id="fatigue-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="fatigue-slider" oninput="updateSlider('fatigue')" />
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);font-size:0.95rem;">Brain fog</span>
+        <span class="slider-value" id="brainfog-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="brainfog-slider" oninput="updateSlider('brainfog')" />
+    </div>
+
+    <div class="capacity-preview" id="capacity-preview">
+      <div class="mode-label" id="cap-mode-label">Standard Day</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:4px;" id="cap-mode-avg">avg: 5.0</div>
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" onclick="saveCapacityAndNext()">Continue</button>
+  </div>
+
+  <!-- STEP 2: PART CHECK -->
+  <div class="boot-step" id="step-2">
+    <div class="boot-step-label">Step 2 of 6</div>
+    <div class="boot-step-title">Which part is loudest right now?</div>
+
+    <div class="part-grid">
+      <button class="btn btn-lg part-btn" onclick="selectPart('Fletcher')">Fletcher</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('Frodo')">Frodo</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('Kilmonger')">Kilmonger</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('Iroh')">Iroh</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('Bojack')">Bojack</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('Zuko')">Zuko</button>
+      <button class="btn btn-lg part-btn" onclick="selectPart('None')" style="grid-column:span 2;">None</button>
+    </div>
+
+    <div class="frodo-audit hidden" id="frodo-audit">
+      <p>Frodo is carrying. Before we go further: what is one thing that can be put down today?</p>
+      <textarea id="frodo-put-down" placeholder="What can be put down today..."></textarea>
+      <button class="btn btn-primary btn-full" style="margin-top:10px;" onclick="confirmFrodo()">Continue</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: OPERATING MODE -->
+  <div class="boot-step" id="step-3">
+    <div class="boot-step-label">Step 3 of 6</div>
+    <div style="text-align:center;">
+      <div class="boot-mode-display" id="step3-mode-name">Standard Day</div>
+    </div>
+    <div class="boot-mode-desc" id="step3-mode-desc">Full practice available. Work with your rhythm.</div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="goToStep(4)">I understand. Continue.</button>
+  </div>
+
+  <!-- STEP 4: IROH QUESTION -->
+  <div class="boot-step" id="step-4">
+    <div class="boot-step-label">Step 4 of 6</div>
+    <div style="text-align:center;font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">The Iroh Question</div>
+    <div class="iroh-question-display" id="iroh-question-text"></div>
+    <div class="countdown-note" id="iroh-countdown">Next available in <span id="iroh-timer">15</span>s</div>
+    <button class="btn btn-primary btn-full btn-lg hidden" id="iroh-next-btn" onclick="goToStep(5)">Next</button>
+  </div>
+
+  <!-- STEP 5: TODAY'S ONE THING -->
+  <div class="boot-step" id="step-5">
+    <div class="boot-step-label">Step 5 of 6</div>
+    <div class="boot-step-title">One thing the best version of you does today.</div>
+    <textarea id="one-thing-input" rows="3" placeholder="What would Iroh choose today?" oninput="checkOneThing()"></textarea>
+    <div class="sentence-warning hidden" id="one-thing-warning">Iroh chooses one thing. Fletcher wants twelve. Which one actually matters?</div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="saveOneThingAndNext()">Continue</button>
+  </div>
+
+  <!-- STEP 6: NIYYAH -->
+  <div class="boot-step" id="step-6">
+    <div class="boot-step-label">Step 6 of 6</div>
+    <div style="text-align:center;font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Niyyah</div>
+    <div class="niyyah-display" id="niyyah-text"></div>
+    <div class="countdown-note" id="niyyah-countdown">Confirm available in <span id="niyyah-timer">30</span>s</div>
+    <button class="btn btn-primary btn-full btn-lg hidden" id="niyyah-confirm-btn" onclick="completeBoot()">Begin — بسم الله</button>
+  </div>
+
+</div><!-- end #boot-overlay -->
+
+<!-- ================================================================
+     MAIN APP
+================================================================ -->
+<div id="app">
+
+  <!-- TOP BAR: capacity dial + iroh question -->
+  <div id="top-bar">
+    <div class="capacity-dial-wrap">
+      <div class="capacity-dial">
+        <svg viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="24" stroke="var(--border)" stroke-width="5" />
+          <circle cx="30" cy="30" r="24"
+            id="dial-arc-top"
+            stroke="var(--amber)"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-dasharray="150.796"
+            stroke-dashoffset="37.699"
+            transform="rotate(-90 30 30)" />
+        </svg>
+        <div class="dial-text" id="dial-text-top">STD</div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);">Operating Mode</div>
+        <div style="font-weight:700;color:var(--text);font-size:0.9rem;" id="top-mode-name">Standard Day</div>
+      </div>
+    </div>
+    <div class="top-iroh-q" id="top-iroh-q"></div>
+  </div>
+
+  <!-- TAB NAVIGATION -->
+  <nav id="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('soma')">SOMA / الجسد</button>
+    <button class="tab-btn" onclick="switchTab('aqeedah')">AQEEDAH / العقيدة</button>
+    <button class="tab-btn" onclick="switchTab('aql')">AQL / العقل</button>
+    <button class="tab-btn" onclick="switchTab('nidal')">NIDAL / النضال</button>
+    <button class="tab-btn" onclick="switchTab('waqt')">WAQT / الوقت</button>
+  </nav>
+
+  <!-- TAB CONTENT -->
+  <div id="tab-content">
+
+    <!-- ====================================================
+         TAB 1: SOMA
+    ==================================================== -->
+    <div class="tab-panel active" id="tab-soma">
+      <div class="tab-header">"What does the body as amanah need today?"</div>
+
+      <!-- Large capacity dial -->
+      <div class="soma-dial-wrap">
+        <div class="soma-dial">
+          <svg viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="50" stroke="var(--border)" stroke-width="8" />
+            <circle cx="60" cy="60" r="50"
+              id="dial-arc-soma"
+              stroke="var(--amber)"
+              stroke-width="8"
+              stroke-linecap="round"
+              stroke-dasharray="314.159"
+              stroke-dashoffset="78.54"
+              transform="rotate(-90 60 60)" />
+          </svg>
+          <div class="soma-dial-text" id="soma-dial-text">STD<br/>DAY</div>
+        </div>
+      </div>
+
+      <!-- Readings row -->
+      <div class="reading-row">
+        <div class="reading-item">
+          <div class="val" id="soma-pain">5</div>
+          <div class="lbl">Pain</div>
+        </div>
+        <div class="reading-item">
+          <div class="val" id="soma-fatigue">5</div>
+          <div class="lbl">Fatigue</div>
+        </div>
+        <div class="reading-item">
+          <div class="val" id="soma-brainfog">5</div>
+          <div class="lbl">Brain fog</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-full" style="margin-bottom:16px;" onclick="openUpdateModal()">Update readings</button>
+
+      <!-- Mode banner -->
+      <div class="mode-banner" id="soma-mode-banner">
+        <div class="mode-word" id="soma-mode-word">Standard Day</div>
+        <div class="mode-sentence" id="soma-mode-sentence">Full practice available. Work with your rhythm.</div>
+      </div>
+
+      <!-- Symptom toggles -->
+      <div class="card">
+        <h3>Active Symptoms</h3>
+        <div class="symptom-grid" id="symptom-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Capacity-adapted practices -->
+      <div class="card" id="practice-suggestions-card">
+        <h3>Practice Suggestions</h3>
+        <div id="practice-suggestions"></div>
+        <button class="btn btn-ghost btn-full" style="margin-top:10px;color:var(--amber);" onclick="askAzureSoma()">✦ Ask Azure</button>
+        <div id="soma-azure-response" style="margin-top:8px;font-size:0.85rem;color:var(--muted);white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- Rest log -->
+      <div class="card">
+        <h3>Rest Log</h3>
+        <button class="rest-log-btn" id="rest-log-btn" onclick="logRest()">
+          <span style="font-size:1.3rem;">🌿</span>
+          <span id="rest-log-text">I rested.</span>
+        </button>
+      </div>
+
+      <div class="section-q">Did I honour the body as amanah today?</div>
+    </div><!-- end tab-soma -->
+
+    <!-- ====================================================
+         TAB 2: AQEEDAH
+    ==================================================== -->
+    <div class="tab-panel" id="tab-aqeedah">
+      <div class="tab-header">"Is my relationship with Allah deepening or becoming routine?"</div>
+
+      <!-- Salah -->
+      <div class="card">
+        <h3>Salah — الصلاة</h3>
+        <div class="salah-grid" id="salah-grid">
+          <!-- populated by JS -->
+        </div>
+        <div id="salah-dispensations" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <!-- Weekly rhythm -->
+      <div class="card">
+        <h3>Last 7 Days</h3>
+        <div class="weekly-view" id="weekly-view"></div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;">Gold = offered. Empty = not yet recorded. No judgment — just the pattern.</div>
+      </div>
+
+      <!-- Notebook Intelligence: Aqeedah -->
+      <div id="aqeedah-notebook-insight"></div>
+
+      <!-- Quran -->
+      <div class="card">
+        <h3>Quran — القرآن</h3>
+        <div class="quran-btns">
+          <button class="btn btn-full" id="quran-yes-btn" onclick="toggleQuran(true)">Yes</button>
+          <button class="btn btn-full" id="quran-no-btn" onclick="toggleQuran(false)">Not yet</button>
+        </div>
+        <div class="quran-fields" id="quran-fields" style="display:none;">
+          <input type="text" id="quran-surah" placeholder="Surah name (optional)" oninput="saveQuranData()" />
+          <input type="text" id="quran-ayah" placeholder="Ayah range (optional)" oninput="saveQuranData()" />
+        </div>
+      </div>
+
+      <!-- Dhikr -->
+      <div class="card">
+        <h3>Dhikr — الذكر</h3>
+        <div class="dhikr-row">
+          <button class="btn dhikr-btn btn-full" id="dhikr-morning-btn" onclick="toggleDhikr('morning')">I remembered Allah this morning.</button>
+          <button class="btn dhikr-btn btn-full" id="dhikr-evening-btn" onclick="toggleDhikr('evening')">I remembered Allah this evening.</button>
+        </div>
+      </div>
+
+      <div class="section-q">What did my practice ask of me today beyond compliance?</div>
+    </div><!-- end tab-aqeedah -->
+
+    <!-- ====================================================
+         TAB 3: AQL
+    ==================================================== -->
+    <div class="tab-panel" id="tab-aql">
+      <div class="tab-header">"Is this work coming from Iroh or Fletcher?"</div>
+
+      <!-- One Thing -->
+      <div class="card">
+        <h3>Today's One Thing</h3>
+        <div class="one-thing-display" id="aql-one-thing">—</div>
+        <div style="margin-top:10px;">
+          <label>Which energy is it coming from?</label>
+          <div class="source-row">
+            <button class="btn btn-full" id="source-iroh-btn" onclick="setSource('Iroh')">Iroh</button>
+            <button class="btn btn-full" id="source-fletcher-btn" onclick="setSource('Fletcher')">Fletcher</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Microsoft Work -->
+      <div class="card">
+        <h3>Active Microsoft Work</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label>Client / Account</label>
+            <input type="text" id="ms-client" placeholder="Who is the hero of today's story?" oninput="saveMSWork()" />
+          </div>
+          <div>
+            <label>Azure trend most relevant to this client right now</label>
+            <input type="text" id="ms-azure-trend" placeholder="Most relevant Azure PaaS or AI trend..." oninput="saveMSWork()" />
+          </div>
+          <div>
+            <label>Narrative leading with</label>
+            <input type="text" id="ms-narrative" placeholder="Customer is hero. Azure is mentor tool." oninput="saveMSWork()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="card">
+        <h3>Active Projects</h3>
+        <div id="frodo-warning" class="frodo-warning hidden">Frodo is carrying too much. Which of these would Iroh put down?</div>
+        <div id="projects-list"></div>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="addProject()">+ Add project</button>
+      </div>
+
+      <!-- Masking tracker -->
+      <div class="card">
+        <h3>Masking Tracker</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label>Hours in high-masking environment today</label>
+            <input type="number" id="masking-hours" min="0" max="24" placeholder="0" oninput="saveMasking()" />
+          </div>
+          <div>
+            <label>Decompression block scheduled?</label>
+            <div class="source-row" style="margin-top:6px;">
+              <button class="btn btn-full" id="decomp-yes-btn" onclick="setDecomp(true)">Yes</button>
+              <button class="btn btn-full" id="decomp-no-btn" onclick="setDecomp(false)">No</button>
+            </div>
+          </div>
+          <div class="masking-warning hidden" id="masking-warning">The mask has a cost. When does it come off today?</div>
+          <button class="btn btn-ghost btn-full" style="margin-top:8px;color:var(--amber);" onclick="askAzureFletcher()">✦ Ask Azure — Fletcher detection</button>
+          <div id="aql-fletcher-response" style="margin-top:8px;font-size:0.85rem;color:var(--muted);white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <!-- Notebook Intelligence: AQL -->
+      <div id="aql-notebook-insight"></div>
+
+      <div class="section-q">Did I do the work from strength or from fear today?</div>
+    </div><!-- end tab-aql -->
+
+    <!-- ====================================================
+         TAB 4: NIDAL
+    ==================================================== -->
+    <div class="tab-panel" id="tab-nidal">
+      <div class="tab-header">"Am I building a cadre's foundation or accumulating interesting ideas?"</div>
+
+      <!-- Study focus -->
+      <div class="card">
+        <h3>Study Focus</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label>Current focus</label>
+            <select id="nidal-focus-dropdown" onchange="saveNidalData()">
+              <option value="Workers Guide">Workers Guide</option>
+              <option value="China">China</option>
+              <option value="Both">Both</option>
+            </select>
+          </div>
+          <div>
+            <label>What specifically am I studying</label>
+            <input type="text" id="nidal-study-focus" placeholder="What is calling for attention?" oninput="saveNidalData()" />
+          </div>
+          <div>
+            <label>Workers Guide — current theoretical question or text</label>
+            <input type="text" id="nidal-workers-q" placeholder="What is the principal contradiction I am working through?" oninput="saveNidalData()" />
+          </div>
+          <div>
+            <label>China — current line struggle or evaluative question</label>
+            <input type="text" id="nidal-china-q" placeholder="Current line struggle..." oninput="saveNidalData()" />
+            <div class="persistent-note">Hold the ML line without campism in either direction.</div>
+          </div>
+          <div>
+            <label>Next reading</label>
+            <input type="text" id="nidal-next-reading" placeholder="Next source to engage..." oninput="saveNidalData()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Organising commitments -->
+      <div class="card">
+        <h3>Organising Commitments</h3>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Visible for orientation, not ticking off.</div>
+        <div id="organising-list"></div>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="addOrganising()">+ Add commitment</button>
+      </div>
+
+      <!-- Line positions -->
+      <div class="card">
+        <h3>Settled Line Positions</h3>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Stable positions — not re-litigated daily.</div>
+        <div id="line-positions-list"></div>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="addLinePosition()">+ Add position</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:6px;color:var(--amber);" onclick="askAzureNidal()">✦ Ask Azure — steelman</button>
+        <div id="nidal-azure-response" style="margin-top:8px;font-size:0.85rem;color:var(--muted);white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- Study log -->
+      <div class="card">
+        <h3>Today's Study Log</h3>
+        <div class="study-log-row" id="study-log-row">
+          <button class="btn" id="studylog-wg" onclick="setStudyLog('Workers Guide')">Workers Guide</button>
+          <button class="btn" id="studylog-china" onclick="setStudyLog('China')">China</button>
+          <button class="btn" id="studylog-both" onclick="setStudyLog('Both')">Both</button>
+          <button class="btn" id="studylog-not" onclick="setStudyLog('Not yet')">Not yet</button>
+        </div>
+        <div>
+          <label>What emerged? (5 words max)</label>
+          <input type="text" id="study-emerged" placeholder="What emerged..." oninput="limitStudyEmerged()" maxlength="50" />
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;" id="study-emerged-count">0 / 5 words</div>
+        </div>
+      </div>
+
+      <!-- Notebook Intelligence: NIDAL -->
+      <div id="nidal-notebook-insight"></div>
+
+      <div class="section-q">Is my formation deepening or staying theoretical?</div>
+    </div><!-- end tab-nidal -->
+
+    <!-- ====================================================
+         TAB 5: WAQT
+    ==================================================== -->
+    <div class="tab-panel" id="tab-waqt">
+      <div class="tab-header">"Am I living in alignment with my actual nature?"</div>
+
+      <!-- Phase bands -->
+      <div class="phase-band phase-1-band" id="phase-band-1">
+        <div class="phase-label">Phase 1 · 0–8h after waking</div>
+        <div class="phase-title" style="color:var(--teal);">Focus Wave</div>
+        <div class="phase-desc">Deep work. Hard analytical tasks. High-demand decisions.</div>
+        <div class="phase-anchor">
+          <label style="font-size:0.75rem;">Anchor</label>
+          <input type="text" id="anchor-1" placeholder="Phase 1 anchor..." onchange="saveAnchors()" />
+        </div>
+      </div>
+
+      <div class="phase-band phase-2-band" id="phase-band-2">
+        <div class="phase-label">Phase 2 · 9–16h after waking</div>
+        <div class="phase-title" style="color:var(--amber);">Creative & Social Wave</div>
+        <div class="phase-desc">Creative work. Community. Conversation. Looser structure.</div>
+        <div class="phase-anchor">
+          <label style="font-size:0.75rem;">Anchor</label>
+          <input type="text" id="anchor-2" placeholder="Phase 2 anchor..." onchange="saveAnchors()" />
+        </div>
+      </div>
+
+      <div class="phase-band phase-3-band" id="phase-band-3">
+        <div class="phase-label">Phase 3 · 17–24h after waking</div>
+        <div class="phase-title" style="color:var(--lavender);">Wind Down</div>
+        <div class="phase-desc">Recovery. Preparation for rest. Minimal stimulation.</div>
+        <div class="phase-anchor">
+          <label style="font-size:0.75rem;">Anchor</label>
+          <input type="text" id="anchor-3" placeholder="Phase 3 anchor..." onchange="saveAnchors()" />
+        </div>
+      </div>
+
+      <!-- Football section -->
+      <div class="card">
+        <h3>الكرة / The Game</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label>Arsenal — tactical or recruitment question live right now</label>
+            <input type="text" id="football-question" placeholder="What is the question the game is asking right now?" oninput="saveWaqtData()" />
+          </div>
+          <div>
+            <label>Active analytical lens</label>
+            <div class="football-lens-row" id="football-lens-row">
+              <button class="btn" onclick="setFootballLens('Analytics')">Analytics</button>
+              <button class="btn" onclick="setFootballLens('Dialectics')">Dialectics</button>
+              <button class="btn" onclick="setFootballLens('Game theory')">Game theory</button>
+              <button class="btn" onclick="setFootballLens('Tactics')">Tactics</button>
+              <button class="btn" onclick="setFootballLens('All')">All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Life and Self Development -->
+      <div class="card">
+        <h3>Life &amp; Self Development</h3>
+        <label>Principle or framework most relevant this week</label>
+        <input type="text" id="lifedev-field" placeholder="What is calling for attention this week?" oninput="saveWaqtData()" />
+      </div>
+
+      <!-- Deviation day toggle -->
+      <div class="deviation-toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="deviation-toggle" onchange="toggleDeviation()" />
+          <span class="toggle-slider"></span>
+        </label>
+        <div class="toggle-label">
+          <strong>Today is an intentional break from routine.</strong><br />
+          Phase bands will soften. No flag. No consequence.
+        </div>
+      </div>
+
+      <!-- Notebook Intelligence: WAQT -->
+      <div id="waqt-notebook-insight"></div>
+
+      <div class="section-q">Did I live today or perform today?</div>
+    </div><!-- end tab-waqt -->
+
+  </div><!-- end #tab-content -->
+
+  <!-- FLOATING JOURNAL BUTTON -->
+  <button id="journal-fab" onclick="openJournal()" title="Open journal">🖊</button>
+
+</div><!-- end #app -->
+
+<!-- ================================================================
+     JOURNAL OVERLAY
+================================================================ -->
+<div id="journal-overlay" class="hidden">
+  <div class="journal-top-row">
+    <div class="journal-title amiri">Journal</div>
+    <button class="btn btn-ghost" onclick="closeJournal()">Close</button>
+  </div>
+  <div style="font-size:0.8rem;color:var(--muted);">Tag a part (optional):</div>
+  <div class="parts-tag-row" id="journal-parts-tags">
+    <!-- populated by JS -->
+  </div>
+  <textarea id="journal-textarea" placeholder="Write freely..."></textarea>
+  <div id="journal-reflect-response" style="font-size:0.85rem;color:var(--muted);white-space:pre-wrap;margin-bottom:8px;"></div>
+  <div class="journal-footer">
+    <button class="btn btn-ghost" onclick="closeJournal()">Cancel</button>
+    <button class="btn btn-ghost" style="color:var(--amber);" onclick="reflectJournal()">✦ Reflect</button>
+    <button class="btn btn-primary" onclick="saveJournalEntry()">Save entry</button>
+  </div>
+</div>
+
+<!-- ================================================================
+     UPDATE READINGS MODAL
+================================================================ -->
+<div id="update-modal" class="hidden">
+  <div class="update-modal-inner">
+    <div style="font-size:1.1rem;font-weight:700;color:var(--text);">Update Readings</div>
+
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);">Pain</span>
+        <span class="slider-value" id="upd-pain-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="upd-pain-slider" oninput="updateUpdSlider('pain')" />
+    </div>
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);">Fatigue</span>
+        <span class="slider-value" id="upd-fatigue-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="upd-fatigue-slider" oninput="updateUpdSlider('fatigue')" />
+    </div>
+    <div class="slider-row">
+      <div class="slider-label-row">
+        <span style="color:var(--text);">Brain fog</span>
+        <span class="slider-value" id="upd-brainfog-val">5</span>
+      </div>
+      <input type="range" min="0" max="10" value="5" id="upd-brainfog-slider" oninput="updateUpdSlider('brainfog')" />
+    </div>
+
+    <div class="capacity-preview" id="upd-cap-preview">
+      <div class="mode-label" id="upd-cap-mode">Standard Day</div>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost btn-full" onclick="closeUpdateModal()">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="saveUpdatedReadings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+/* ============================================================
+   CONFIGURATION
+============================================================ */
+const CONFIG = {
+  SUPABASE_URL:           '',  // e.g. 'https://xxxxx.supabase.co'
+  SUPABASE_ANON_KEY:      '',  // Supabase anon/public key
+  AZURE_ENDPOINT:         '',  // e.g. 'https://xxxxx.openai.azure.com'
+  AZURE_API_KEY:          '',  // Azure OpenAI API key
+  AZURE_DEPLOYMENT_NAME:  '',  // e.g. 'gpt-4o'
+};
+
+/* ============================================================
+   SUPABASE CLIENT (initialised only when configured)
+============================================================ */
+let supabase = null;
+if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase) {
+  supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+}
+
+/* ============================================================
+   CONSTANTS & HELPERS
+============================================================ */
+const PARTS = ['Fletcher','Frodo','Kilmonger','Iroh','Bojack','Zuko'];
+const SYMPTOMS = [
+  'POTS episode','Fibro flare','Fatigue crash','Sensory overload',
+  'Brain fog','Pain spike','Low mood','Masking depletion'
+];
+const PRAYERS = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+
+const IROH_QUESTIONS = [
+  "What would you do today if you had nothing to prove?",
+  "What does Allah's mercy look like in your material conditions today?",
+  "Are you building something or performing something?",
+  "What would Frodo put down if Iroh were carrying it instead?",
+  "What are you doing for love of the game rather than fear of the score?",
+  "Who are you when no one is watching and Fletcher has gone quiet?",
+  "What does the best version of you do on a day exactly like this one?",
+  "Where is the gap between the person you are performing and the person you are?",
+  "What would you tell your younger self about today?",
+  "Is what you are about to do coming from strength or from fear?",
+  "What does your deen ask of you today, not your ambition?",
+  "If you made no progress today except being present, would that be enough?"
+];
+
+const NIYYAH_TEXTS = [
+  "Innamaa al-a'maalu bin-niyyaat.\n(Actions are by intentions.)",
+  "Allah does not burden a soul beyond that it can bear.\n(Quran 2:286)",
+  "Make things easy and do not make them difficult.\n(Bukhari)",
+  "The most beloved deeds to Allah are the most consistent, even if small.\n(Bukhari)",
+  "Indeed, with hardship comes ease.\n(Quran 94:5)",
+  "And He found you lost and guided you.\n(Quran 93:7)",
+  "Take from good deeds only what you are able to sustain.\n(Nasa'i)"
+];
+
+const MODE_DATA = {
+  'Rest Protocol':        { color: '#f59e0b', short: 'REST', sentence: 'The body is the priority. One survival task. Everything else is tomorrow\'s concern.' },
+  'Minimum Viable Day':   { color: '#d4a843', short: 'MVD',  sentence: 'Three things. Chosen by Iroh, not Fletcher.' },
+  'Standard Day':         { color: '#6b7c5c', short: 'STD',  sentence: 'Full practice available. Work with your rhythm.' },
+  'High Capacity Day':    { color: '#0f4c5c', short: 'HIGH', sentence: 'Use this wisely. Protect tomorrow\'s capacity.' }
+};
+
+/* ============================================================
+   NOTEBOOK INTELLIGENCE — INSIGHT ARRAYS
+============================================================ */
+const aqeedahInsights = [
+  {
+    title: "The Inner Reality of Sincerity (Ikhlas)",
+    idea: "Actions are lifeless forms — the presence of inner sincerity is what endows them with life-giving spirit. Any action devoid of the pure intention to draw near to Allah fuels the ego rather than nurturing faith.",
+    question: "Is Andrew Neiman driving my pursuit of excellence today for worldly status, or is my intention anchored purely in sincere service to Allah?"
+  },
+  {
+    title: "Contentment with the Divine Decree (Rida)",
+    idea: "Contentment is the quiescence of the heart under the events of Divine decree, resting in the certainty that whoever is pleased with Allah's choices will find Allah pleased with them. Physical afflictions become mechanisms of spiritual elevation.",
+    question: "Where are Bojack and Zuko resisting my physical limits today, and how can I surrender to my ME/CFS and POTS as Allah's perfect, customised decree for my soul?"
+  },
+  {
+    title: "The Gaze of the Divine (Muraqaba and Ihsan)",
+    idea: "Spiritual perfection requires worshipping Allah as if you see Him, grounded in the certainty that He closely beholds your inner and outer being. Recognising that no thought escapes His regard naturally cultivates a loving awe within the soul.",
+    question: "In this exact moment, am I acting with the awareness that the Lord of the Worlds is intimately observing the deepest, most hidden secrets of my heart?"
+  },
+  {
+    title: "Patience and Non-Engagement (Sabr)",
+    idea: "True patience restrains the heart from agitation, the tongue from complaint, and the mind from destructive thoughts. By refusing to validate the whisperings of the tyrannical self and turning to Allah, you neutralise the obsessions that sustain anxiety.",
+    question: "When Fletcher attacks me with catastrophic waswas today, will I validate his tyranny by arguing, or will I practice defusion by patiently seeking refuge in Allah?"
+  },
+  {
+    title: "Gratitude as Spiritual Abundance (Shukr)",
+    idea: "Gratitude is an active state of consciousness that acknowledges all blessings as coming from Allah — it is the divine guarantee through which grace is infinitely multiplied. Focusing on what is functional rather than lacking transitions the heart from scarcity to God's generosity.",
+    question: "How can I reconfigure my AuDHD perception right now to actively witness and thank Allah for a specific blessing I have been completely taking for granted?"
+  },
+  {
+    title: "The Illusion of the World and Reality of the Hereafter",
+    idea: "The life of this world is a fleeting comfort of illusion — true wakefulness and eternal peace are found only in the Hereafter. Continually remembering death shatters the ego's attachments and reorients the compass entirely toward Allah.",
+    question: "Are my current stresses rooted in the delusion that Microsoft and this temporary world are my permanent home, or am I living today as a traveller preparing for eternity?"
+  }
+];
+
+const seInsights = [
+  {
+    title: "The Challenger Reframe",
+    idea: "Instead of asking what keeps customers up at night, lead with a disruptive, data-backed insight that changes their understanding of their own business — forcing them to see the status quo as more dangerous than adopting your solution.",
+    question: "What hidden compliance or operational risk is this customer currently ignoring that only Azure AI can solve?"
+  },
+  {
+    title: "SPIN Discovery — Not Interrogation",
+    idea: "Technical discovery is a structured questioning sequence (Situation, Problem, Implication, Need-Payoff) to uncover Key Business Issues and map them to how technology will increase revenue, decrease cost, or mitigate risk. SPIN is a cognitive brake against premature solution-eering.",
+    question: "Am I prepared to ask questions about their business pain, or am I just waiting for my turn to talk about Azure features?"
+  },
+  {
+    title: "The Trust Equation (CRISP)",
+    idea: "Trust is measurable: (Credibility + Reliability + Intimacy) / Self-Orientation. You must maximise technical excellence and follow-through while drastically lowering focus on Microsoft's quota or your own ego. Admitting a limitation massively spikes credibility.",
+    question: "How can I demonstrate today that I care more about protecting their firm's data than I do about hitting my Microsoft quota?"
+  },
+  {
+    title: "Begin with the End — The Action Shot",
+    idea: "Lead the demonstration with the ultimate business value moment in the first minutes, not built up to linearly. Show the baked cake first to satisfy executives, then dive into architecture only if engineers challenge you.",
+    question: "What is the 2-minute 'Ah-Ha!' moment that will instantly prove business value to the least technical executive in the room?"
+  },
+  {
+    title: "Loss Aversion and Rational Drowning",
+    idea: "Buyers fear losing what they have far more than gaining something new. Rational Drowning quantifies the true catastrophic cost of inaction — financial institutions don't buy AI to be innovative, they buy it to avoid massive regulatory fines and lost AUM.",
+    question: "Have I quantified the financial and regulatory cost of them doing nothing at all?"
+  },
+  {
+    title: "LACE Objection Handling",
+    idea: "Listen, Accept, Clarify, Execute — a structured mechanism for handling hostile or complex questions without becoming defensive. It bypasses the emotional freeze response from RSD and gives a script to process input safely and analytically.",
+    question: "Am I emotionally prepared to Accept and Clarify hostile security questions without letting Fletcher make me defensive?"
+  }
+];
+
+const azureInsights = [
+  {
+    title: "Zero-Trust via Managed Identities",
+    idea: "Production Azure AI demands Entra ID Managed Identities, RBAC, and Private Endpoints — API calls never traverse the public internet. This provides automatic credential rotation and granular audit logging for every request.",
+    question: "Does this architecture ensure zero-trust authentication, or are we still relying on static API keys that a bank's security team will immediately reject?"
+  },
+  {
+    title: "Multi-Agent Orchestration with MCP",
+    idea: "Complex enterprise workflows are broken into specialised sub-agents managed by an orchestrator, connecting securely to enterprise data through MCP servers without directly exposing raw databases to LLMs. Banks can automate complex multi-step financial processes.",
+    question: "Which legacy system in this bank's architecture could be wrapped as an MCP tool to make it AI-accessible without exposing raw database access?"
+  },
+  {
+    title: "Model Routing and Semantic Caching",
+    idea: "Azure AI routes simple tasks to smaller cheaper models while reserving expensive models for complex reasoning, cutting costs by up to 60%. Semantic Caching serves answers for repetitive queries without hitting the backend LLM.",
+    question: "What percentage of this client's AI queries are repetitive enough to benefit from semantic caching, and which tasks truly require the most capable model?"
+  },
+  {
+    title: "Foundry IQ — Agentic Retrieval with Purview Governance",
+    idea: "Standard RAG is evolving into agentic retrieval that dynamically plans queries across fragmented sources while enforcing Microsoft Purview sensitivity labels and Entra ID document-level access controls. Analysts only see data they're authorised to view.",
+    question: "Which sensitive data classifications does this bank have that make Purview-governed retrieval a compliance requirement rather than just a feature?"
+  },
+  {
+    title: "OpenTelemetry for Regulatory Observability",
+    idea: "Azure AI Foundry natively integrates OpenTelemetry to log every tool call, agent communication, token usage, and latency into Azure Monitor. Capital markets require total transparency for AI-driven decisions to be proven compliant to financial regulators.",
+    question: "Can I demonstrate to this bank's compliance team a complete audit trail of every AI decision, including which data source informed it?"
+  },
+  {
+    title: "AI-Driven Legacy Modernisation",
+    idea: "Autonomous agents can migrate on-premise legacy applications to cloud and upgrade older code frameworks automatically. SRE agents can automatically triage, root-cause, and mitigate live site issues in real time.",
+    question: "What is this bank's most critical legacy modernisation risk, and how would an AI-driven migration agent reduce the blast radius of that transition?"
+  }
+];
+
+const storyInsights = [
+  {
+    title: "The Angels' Cocktail",
+    idea: "Storytelling is neurochemical engineering: induce focus through dopamine (suspense, knowledge gaps), trust through oxytocin (calibrated vulnerability), and relaxation through endorphins (humour). Know which hormone the room needs before you start.",
+    question: "Which specific hormone does this executive need right now, and where is the precise knowledge gap in my demo that will trigger it?"
+  },
+  {
+    title: "ABT — And, But, Therefore",
+    idea: "The DNA of narrative momentum requires replacing feature-dumping 'and then' logic with 'but' to introduce conflict, followed by 'therefore' to present the necessary consequence. Eliminate every 'and then' from your pitch.",
+    question: "Have I eliminated every 'and then' from this Azure AI pitch and replaced them with a conflict-driven 'but' and 'therefore'?"
+  },
+  {
+    title: "The 5-Second Moment",
+    idea: "Every meaningful story is built around a single pivotal moment of transformation where the protagonist's core belief fundamentally shifts from 'I thought this' to 'now I think this'. The whole narrative serves this one moment.",
+    question: "What is the exact 5-second transformation the technical buyer must experience before they can trust this solution?"
+  },
+  {
+    title: "Show, Don't Tell — Specificity",
+    idea: "Rather than naming an emotion or summarising a situation, use specific physical manifestations, exact dialogue, and sensory actions to transport the listener into the visceral reality of the scene.",
+    question: "Am I telling the client how successful the project was, or am I showing them the exact verbatim dialogue and physical reaction of the customer in that crucial moment?"
+  },
+  {
+    title: "Start in the Action",
+    idea: "To bypass distraction and immediately hijack attention, skip context-heavy preambles and drop the listener directly into a specific moment of forward momentum. No 'hello my name is' — open in medias res.",
+    question: "Does this presentation open with an immediate vivid action, or does it start with an agenda slide and a preamble about who Microsoft is?"
+  },
+  {
+    title: "Work Backwards — The Last Dab",
+    idea: "The most effective way to plot a narrative is to define your final most memorable line first, then construct the preceding conflict backward from that destination. Begin with the ending you want them to walk away with.",
+    question: "What is the one unforgettable sentence I want the CFO to repeat after I leave the room, and does my entire demo build backward from that exact point?"
+  }
+];
+
+const chinaInsights = [
+  {
+    title: "The Evolution of the Principal Contradiction",
+    idea: "In China, the principal contradiction has evolved from class struggle to backward productive forces and now to the tension between unbalanced development and people's ever-growing needs. ML analysis demands identifying the actual contradiction operative at each historical stage.",
+    question: "Does a specific state policy genuinely address the current principal contradiction of unbalanced development, or does it serve to mask emerging class antagonisms?"
+  },
+  {
+    title: "Commanding Heights vs. Capitalist Restoration",
+    idea: "Socialism with Chinese Characteristics uses market mechanisms as tools to liberate productive forces while officially maintaining public ownership over 'commanding heights' upstream industries. The question is whether capital is subordinated to the state or vice versa.",
+    question: "In this specific sector, is private capital successfully subordinated to the socialist state apparatus, or is the state becoming subordinated to the imperatives of capital accumulation?"
+  },
+  {
+    title: "Mass Line vs. Bureaucratic Involution",
+    idea: "CPC legitimacy relies on the Mass Line methodology of remaining in close contact with the people, yet the vanguard constantly risks alienation through the Four Malfeasances: formalism, bureaucratism, hedonism, and extravagance.",
+    question: "How do grassroots movements utilise the state's own Mass Line rhetoric to combat bureaucratic entrenchment and demand material justice?"
+  },
+  {
+    title: "Primitive Accumulation and the Rural-Urban Divide",
+    idea: "China's rapid modernisation relied heavily on extracting surplus from the rural sector and utilising the hukou system to manage a massive underclass of migrant workers. The structural reliance on hyper-exploitation of migrant labour is a foundational tension.",
+    question: "How does the Party reconcile its ideological foundation as vanguard of the working class with its structural reliance on the hyper-exploitation of informal and migrant labour?"
+  },
+  {
+    title: "Global Integration and Anti-Hegemonism",
+    idea: "China integrated into global capitalism to drive development and now exports capital through the Belt and Road Initiative while opposing Western-style 'zero-sum' imperialism. Whether this represents anti-imperialism or emergent great-power logic is the key line question.",
+    question: "Does China's export of capital represent a genuinely anti-imperialist 'Community of Shared Future', or does it exhibit the necessary expansionist tendencies of an emergent great-power capitalist state?"
+  },
+  {
+    title: "Seeking Truth from Facts vs. Ideological Dogmatism",
+    idea: "Chinese Marxism explicitly rejects rigid dogmatism and the 'historical nihilism' of applying Western liberal-democratic templates, insisting that social practice and material results are the ultimate criteria for testing truth.",
+    question: "Are we analysing Chinese development based on material outcomes for its population, or are we imposing an abstract Western Marxist ideal of what socialism is supposed to look like?"
+  }
+];
+
+const lifeInsights = [
+  {
+    title: "Rhythmic Routine — Biological Materialism over Capitalist Time",
+    idea: "Rigid clock-based schedules are industrial-era constructs that ignore the non-linear reality of an AuDHD nervous system. Build a flexible routine around natural biological waves — focus, creativity, recovery — anchored with a single non-negotiable activity per phase.",
+    question: "Baymax asks: what biological wave am I currently riding, and what is the single low-friction anchor for this phase?"
+  },
+  {
+    title: "The 5% Rule — Timing Your Stops",
+    idea: "With ME/CFS and POTS, forcing neurotypical execution triggers catastrophic physical crash. When depleted, break the task down to 5% and explicitly stop working before your energy is completely empty. This preserves the biological asset.",
+    question: "If my battery is flashing red, what is the absolute 5% Minimum Viable Day action I can execute right now before formally clocking out to rest?"
+  },
+  {
+    title: "Functional Accommodation — The Anti-Fletcher Paradigm",
+    idea: "You do not exist to serve your environment — your space and systems exist solely to serve you. Mess, executive dysfunction, and the need for physical aids are morally neutral. Stop atoning for the 'sin' of falling apart.",
+    question: "Iroh asks: is Fletcher currently using a neurotypical standard to shame us, or are we actively building a functional system that honours our disability?"
+  },
+  {
+    title: "Cognitive Defusion — Disarming the Inner Oppressor",
+    idea: "Fletcher will continuously generate relentless thoughts demanding perfection and weaponising chronic illness as laziness. Recognise these thoughts not as objective truth but as mental events generated by a traumatised ego state. Observe without fusing.",
+    question: "Am I fusing with the thought that I am a failure, or can I step back into the Observing Self and simply notice that my mind is broadcasting an anxious story?"
+  },
+  {
+    title: "Self-Negotiation — Cadre Formation Within",
+    idea: "Using brute-force discipline to suppress your parts is internal oppression that guarantees rebellion and burnout. When a part is avoiding a task, curiously investigate the underlying need it is trying to meet and find a mutually agreeable compromise.",
+    question: "What unmet biological or emotional need is my resistance trying to fulfil right now, and what is our negotiated compromise?"
+  },
+  {
+    title: "Embracing Finitude — Tawakkul and the Infinite Game",
+    idea: "The fantasy of total mastery over time and conquering illness sets impossible standards. By practising tawakkul — accepting finite unpredictable capacity and surrendering the ultimate career outcome to Allah — you detach identity from the trajectory and focus on the integrity of present action.",
+    question: "Have I surrendered the illusion of total control today, focusing solely on executing the present moment with intention and leaving the outcome to reality?"
+  }
+];
+
+const footballTacticalInsights = [
+  {
+    title: "The O-Ring Theory — Weakest Links",
+    idea: "Football is highly interdependent: a single inferior component can ruin an entire sequence. A team's success is defined by its weakest links, not its superstars. Efficient improvement means upgrading the worst players, not exclusively acquiring Galácticos.",
+    question: "Are there positional weaknesses in Arsenal's XI that drag down the multiplicative efficiency of the entire team, particularly when injuries force rotational players onto the pitch?"
+  },
+  {
+    title: "Process vs. Outcome — Expected Goals",
+    idea: "Roughly half of all matches are decided by luck rather than skill. xG quantifies the probability of chances created and conceded, ensuring performance is judged by a reliable process rather than emotional reactions to the final score.",
+    question: "When Arsenal drops points, do the underlying xG metrics suggest a genuine structural failure in Arteta's system, or did the team suffer from short-term variance?"
+  },
+  {
+    title: "Positional Play and the Half-Spaces",
+    idea: "Elite teams structure positioning across five vertical channels to manipulate defences, paying special attention to the half-spaces between the wing and centre. Overloading one side draws opponents in, then the resulting space on the opposite side is exploited.",
+    question: "How effectively do Arsenal's inverted full-backs and advanced midfielders occupy the half-spaces to pin back defenders and create attacking overloads?"
+  },
+  {
+    title: "Packing and Expected Threat (xT)",
+    idea: "Simply holding possession is sterile. Packing counts how many opposition defenders are bypassed by a pass; Expected Threat quantifies the danger generated by ball progression into high-value zones. These separate line-breakers from safe passers.",
+    question: "Which Arsenal players consistently generate the highest Expected Threat and bypass the most defenders, proving they are the true engines of ball progression?"
+  },
+  {
+    title: "Gegenpressing — Counter-Pressing and Transition",
+    idea: "The most effective playmaker is the counter-press. The best moment to win the ball back is the exact second it is lost, while the opposition is still looking for orientation and their defensive shape is fanned out.",
+    question: "Does Arsenal's attacking shape keep players close enough together to immediately execute a cohesive counter-press the second they lose the ball in the final third?"
+  },
+  {
+    title: "The Cybernetic System and Super-Linearity",
+    idea: "A football team is a cybernetic system where the efficiency of the whole is exponentially greater than the sum of individual parts. This super-linearity requires total cultural alignment and tactical discipline — players execute their roles and subvert ego for the collective.",
+    question: "Has Arteta's enforcement of cultural non-negotiables successfully eradicated ego-driven play, ensuring every Arsenal player sacrifices for the super-linear efficiency of the collective?"
+  }
+];
+
+const footballAnalyticsInsights = [
+  {
+    title: "Advanced Action Valuation — xG, xT, VAEP",
+    idea: "Models like VAEP assign fractional goal values to non-shot actions (passes, dribbles) based on how much they increase scoring probability. This separates underlying skill from luck by focusing on the process of chance creation rather than final outcomes.",
+    question: "Does the model account for the specific positional bias of the player performing the action, or does it treat all actions as if executed by a statistically average player?"
+  },
+  {
+    title: "Explainable AI — SHAP Values",
+    idea: "SHAP unpacks complex black-box models by calculating the exact contribution of each input feature to the final prediction. This transparency is essential for building trust with coaches and medical staff who need to understand why a recommendation was made.",
+    question: "If the algorithm predicts high injury risk or recommends a transfer, can it output a transparent human-readable breakdown of exactly why that prediction was made?"
+  },
+  {
+    title: "Spatio-Temporal Pitch Control",
+    idea: "Dynamic geometric models using player tracking data calculate the probability that any player will be first to arrive at any location on the pitch. This quantifies off-the-ball movements and tactical influence without the ball.",
+    question: "Does the pitch control model rely solely on static coordinates, or does it incorporate dynamic factors like velocity, momentum, and time required to intercept the ball?"
+  },
+  {
+    title: "Network Analysis for Systemic Compatibility",
+    idea: "A team modelled as a complex network — players as nodes, passes as weighted edges — allows graph metrics to quantify team chemistry, identify key playmakers, and understand the tactical stability of passing structure.",
+    question: "If evaluating a potential transfer target, can the model simulate how the new player integrates into the team's existing passing web, enhancing cohesion rather than becoming a structural bottleneck?"
+  },
+  {
+    title: "Workload Monitoring and Injury Forecasting",
+    idea: "ML algorithms forecast non-contact injury risk by evaluating cumulative strain across external GPS workload metrics (high-speed running, decelerations) alongside internal data such as psychological stress and perceived exertion.",
+    question: "How effectively does the model balance objective physical GPS data with subjective internal load metrics to identify the subtle non-linear warning signs of overtraining?"
+  },
+  {
+    title: "Advanced Player Valuation via Ensemble Learning",
+    idea: "Ensemble algorithms (Gradient Boosting, CatBoost, Random Forests) forecast transfer fees and market value based on multidimensional technical, physical, and cognitive features — filtering out market biases like superstar fame inflation.",
+    question: "Are the valuation predictions robust enough to filter out market biases, strictly evaluating underlying tactical and physical performance data rather than reputation?"
+  }
+];
+
+/* ============================================================
+   NOTEBOOK INTELLIGENCE — HELPERS
+============================================================ */
+function getNotebookInsight(arr) {
+  return arr[Math.floor(dayOfYear() % arr.length)];
+}
+
+function renderInsightCard(insight, notebookName) {
+  return `<div class="insight-card">
+    <div class="insight-label">من الكتب &middot; ${escHtml(notebookName)}</div>
+    <div class="insight-title">${escHtml(insight.title)}</div>
+    <div class="insight-idea">${escHtml(insight.idea)}</div>
+    <div class="insight-question">${escHtml(insight.question)}</div>
+  </div>`;
+}
+
+function renderAqeedahInsights() {
+  const container = document.getElementById('aqeedah-notebook-insight');
+  if (!container) return;
+  const insight = getNotebookInsight(aqeedahInsights);
+  container.innerHTML = renderInsightCard(insight, 'Islamic Knowledge');
+}
+
+function renderAqlInsights() {
+  const container = document.getElementById('aql-notebook-insight');
+  if (!container) return;
+  const seInsight = getNotebookInsight(seInsights);
+  const azureInsight = getNotebookInsight(azureInsights);
+  const storyInsight = getNotebookInsight(storyInsights);
+  container.innerHTML =
+    renderInsightCard(seInsight, 'Solution Engineering') +
+    renderInsightCard(azureInsight, 'Azure Trends') +
+    renderInsightCard(storyInsight, 'Storytelling');
+}
+
+function renderNidalInsights() {
+  const container = document.getElementById('nidal-notebook-insight');
+  if (!container) return;
+  const insight = getNotebookInsight(chinaInsights);
+  container.innerHTML = renderInsightCard(insight, 'China');
+}
+
+function renderWaqtInsights() {
+  const container = document.getElementById('waqt-notebook-insight');
+  if (!container) return;
+  const lifeInsight = getNotebookInsight(lifeInsights);
+  const tacticalInsight = getNotebookInsight(footballTacticalInsights);
+  const analyticsInsight = getNotebookInsight(footballAnalyticsInsights);
+  container.innerHTML =
+    renderInsightCard(lifeInsight, 'Life &amp; Self Development') +
+    renderInsightCard(tacticalInsight, 'Football Books') +
+    renderInsightCard(analyticsInsight, 'Football Analytics');
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function dayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  return Math.floor(diff / 86400000);
+}
+
+function getCapacityMode(avg) {
+  if (avg > 7)         return 'Rest Protocol';
+  if (avg >= 5)        return 'Minimum Viable Day';
+  if (avg >= 3)        return 'Standard Day';
+  return 'High Capacity Day';
+}
+
+/* ============================================================
+   S — STORAGE WRAPPER (localStorage + async Supabase sync)
+============================================================ */
+const S = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      if (v === null) return fallback;
+      return JSON.parse(v);
+    } catch(e) { return fallback; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+    S._syncToSupabase(key, val);
+  },
+  _syncToSupabase(key, val) {
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data?.user) return;
+      const userId = data.user.id;
+      supabase.from('sync').upsert(
+        { user_id: userId, key: key, value: val, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,key' }
+      ).then(() => {}).catch(() => {});
+    }).catch(() => {});
+  },
+  async pull(key) {
+    if (!supabase) return null;
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) return null;
+      const { data, error } = await supabase
+        .from('sync')
+        .select('value')
+        .eq('user_id', userData.user.id)
+        .eq('key', key)
+        .single();
+      if (error || !data) return null;
+      localStorage.setItem(key, JSON.stringify(data.value));
+      return data.value;
+    } catch(e) { return null; }
+  }
+};
+
+/* Backward-compatible aliases */
+function ls(key, fallback) { return S.get(key, fallback); }
+function lsSet(key, val) { S.set(key, val); }
+
+/* ============================================================
+   AZURE AI — askAzure(userPrompt, systemContext)
+============================================================ */
+async function askAzure(userPrompt, systemContext) {
+  if (!CONFIG.AZURE_ENDPOINT || !CONFIG.AZURE_API_KEY || !CONFIG.AZURE_DEPLOYMENT_NAME) {
+    return '⚠ Azure AI not configured. Add your credentials to the CONFIG object.';
+  }
+  const url = `${CONFIG.AZURE_ENDPOINT}/openai/deployments/${CONFIG.AZURE_DEPLOYMENT_NAME}/chat/completions?api-version=2024-02-15-preview`;
+
+  /* Gather last 7 days of telemetry for metacognitive context */
+  const telemetry = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    const cap = S.get(`saaleh_os_capacity_${ds}`, null) || (i === 0 ? S.get('saaleh_os_capacity', null) : null);
+    if (cap) telemetry.push({ date: ds, ...cap });
+  }
+
+  const systemMsg = [
+    'You are Iroh — a wise, warm, non-judgmental guide inside Saaleh OS.',
+    'The user is a 21-year-old AuDHD Muslim with POTS, ME/CFS, fibromyalgia, and OCD.',
+    'Low capacity is a parameter, not a failure. Every state is valid.',
+    'Never use streak counters. Never use red failure states.',
+    'Be concise (3–5 sentences max). Use plain language.',
+    systemContext || '',
+    telemetry.length ? `Recent telemetry (last 7 days): ${JSON.stringify(telemetry)}` : ''
+  ].filter(Boolean).join('\n');
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': CONFIG.AZURE_API_KEY
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 300,
+        temperature: 0.7
+      })
+    });
+    if (!resp.ok) {
+      const errText = await resp.text();
+      return `⚠ Azure error (${resp.status}): ${errText.slice(0, 120)}`;
+    }
+    const json = await resp.json();
+    return json.choices?.[0]?.message?.content || '(No response from Azure)';
+  } catch(e) {
+    return `⚠ Network error: ${e.message}`;
+  }
+}
+
+/* ============================================================
+   SERVICE WORKER REGISTRATION
+============================================================ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+/* ============================================================
+   BOOT SEQUENCE — state
+============================================================ */
+let currentStep = 1;
+let selectedPart = null;
+let irohTimerInterval = null;
+let niyyahTimerInterval = null;
+
+/* Initialise on load */
+window.addEventListener('DOMContentLoaded', () => {
+  const lastBoot = ls('saaleh_os_last_boot_date', null);
+  if (lastBoot === todayStr()) {
+    // Already booted today — skip to main interface
+    document.getElementById('boot-overlay').classList.add('hidden');
+    showApp();
+  } else {
+    initBoot();
+  }
+});
+
+function initBoot() {
+  // Pre-fill boot sliders with any saved capacity
+  const cap = ls('saaleh_os_capacity', null);
+  if (cap) {
+    document.getElementById('pain-slider').value = cap.pain;
+    document.getElementById('fatigue-slider').value = cap.fatigue;
+    document.getElementById('brainfog-slider').value = cap.brain_fog;
+  }
+  updateSlider('pain');
+  updateSlider('fatigue');
+  updateSlider('brainfog');
+  showBootStep(1);
+}
+
+function showBootStep(n) {
+  document.querySelectorAll('.boot-step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('step-' + n);
+  if (el) { el.classList.add('active'); el.classList.add('fade-in'); }
+  currentStep = n;
+  if (n === 4) startIrohTimer();
+  if (n === 6) startNiyyahTimer();
+  if (n === 3) populateStep3();
+  if (n === 4) populateStep4();
+  if (n === 6) populateStep6();
+}
+
+function goToStep(n) { showBootStep(n); }
+
+/* --- Step 1 helpers --- */
+function updateSlider(which) {
+  const idMap = { pain: 'pain', fatigue: 'fatigue', brainfog: 'brainfog' };
+  const sliderEl = document.getElementById(which + '-slider');
+  const valEl = document.getElementById(which + '-val');
+  if (sliderEl && valEl) valEl.textContent = sliderEl.value;
+  recalcCapacityPreview();
+}
+
+function recalcCapacityPreview() {
+  const p = +document.getElementById('pain-slider').value;
+  const f = +document.getElementById('fatigue-slider').value;
+  const b = +document.getElementById('brainfog-slider').value;
+  const avg = (p + f + b) / 3;
+  const mode = getCapacityMode(avg);
+  document.getElementById('cap-mode-label').textContent = mode;
+  document.getElementById('cap-mode-avg').textContent = 'avg: ' + avg.toFixed(1);
+}
+
+function saveCapacityAndNext() {
+  const p = +document.getElementById('pain-slider').value;
+  const f = +document.getElementById('fatigue-slider').value;
+  const b = +document.getElementById('brainfog-slider').value;
+  const avg = (p + f + b) / 3;
+  const mode = getCapacityMode(avg);
+  lsSet('saaleh_os_capacity', { pain: p, fatigue: f, brain_fog: b, mode });
+  goToStep(2);
+}
+
+/* --- Step 2 helpers --- */
+function selectPart(part) {
+  selectedPart = part;
+  // Highlight selected button
+  document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('selected'));
+  const btns = document.querySelectorAll('.part-btn');
+  btns.forEach(b => { if (b.textContent.trim() === part || (part === 'None' && b.textContent.trim() === 'None')) b.classList.add('selected'); });
+
+  lsSet('saaleh_os_active_part', part);
+
+  if (part === 'Frodo') {
+    document.getElementById('frodo-audit').classList.remove('hidden');
+  } else {
+    document.getElementById('frodo-audit').classList.add('hidden');
+    goToStep(3);
+  }
+}
+
+function confirmFrodo() {
+  const txt = document.getElementById('frodo-put-down').value.trim();
+  if (txt) lsSet('saaleh_os_frodo_put_down', { date: todayStr(), text: txt });
+  goToStep(3);
+}
+
+/* --- Step 3 helpers --- */
+function populateStep3() {
+  const cap = ls('saaleh_os_capacity', { mode: 'Standard Day' });
+  const mode = cap.mode || 'Standard Day';
+  const md = MODE_DATA[mode] || MODE_DATA['Standard Day'];
+  document.getElementById('step3-mode-name').textContent = mode;
+  document.getElementById('step3-mode-name').style.color = md.color;
+  document.getElementById('step3-mode-desc').textContent = md.sentence;
+}
+
+/* --- Step 4 helpers --- */
+function populateStep4() {
+  const idx = dayOfYear() % 12;
+  document.getElementById('iroh-question-text').textContent = IROH_QUESTIONS[idx];
+  lsSet('saaleh_os_iroh_question_idx', idx);
+}
+
+function startIrohTimer() {
+  let secs = 15;
+  const timerEl = document.getElementById('iroh-timer');
+  const countdownEl = document.getElementById('iroh-countdown');
+  const nextBtn = document.getElementById('iroh-next-btn');
+  timerEl.textContent = secs;
+  if (irohTimerInterval) clearInterval(irohTimerInterval);
+  irohTimerInterval = setInterval(() => {
+    secs--;
+    timerEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(irohTimerInterval);
+      countdownEl.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+    }
+  }, 1000);
+}
+
+/* --- Step 5 helpers --- */
+function checkOneThing() {
+  const txt = document.getElementById('one-thing-input').value;
+  const hasMultiple = (txt.match(/[.!?]/g) || []).length > 1 || txt.includes('\n');
+  document.getElementById('one-thing-warning').classList.toggle('hidden', !hasMultiple);
+}
+
+function saveOneThingAndNext() {
+  const txt = document.getElementById('one-thing-input').value.trim();
+  if (txt) lsSet('saaleh_os_one_thing', txt);
+  goToStep(6);
+}
+
+/* --- Step 6 helpers --- */
+function populateStep6() {
+  const idx = dayOfYear() % 7;
+  document.getElementById('niyyah-text').textContent = NIYYAH_TEXTS[idx];
+}
+
+function startNiyyahTimer() {
+  let secs = 30;
+  const timerEl = document.getElementById('niyyah-timer');
+  const countdownEl = document.getElementById('niyyah-countdown');
+  const confirmBtn = document.getElementById('niyyah-confirm-btn');
+  timerEl.textContent = secs;
+  if (niyyahTimerInterval) clearInterval(niyyahTimerInterval);
+  niyyahTimerInterval = setInterval(() => {
+    secs--;
+    timerEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(niyyahTimerInterval);
+      countdownEl.classList.add('hidden');
+      confirmBtn.classList.remove('hidden');
+    }
+  }, 1000);
+}
+
+function completeBoot() {
+  lsSet('saaleh_os_last_boot_date', todayStr());
+  /* Save date-stamped capacity snapshot for 7-day telemetry */
+  const cap = ls('saaleh_os_capacity', null);
+  if (cap) lsSet('saaleh_os_capacity_' + todayStr(), cap);
+  // Fade out boot overlay
+  const overlay = document.getElementById('boot-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 150ms ease';
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    showApp();
+  }, 150);
+}
+
+/* ============================================================
+   MAIN APP INITIALISATION
+============================================================ */
+function showApp() {
+  const app = document.getElementById('app');
+  app.classList.add('visible');
+  app.style.opacity = '0';
+  app.style.transition = 'opacity 150ms ease';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { app.style.opacity = '1'; });
+  });
+
+  initTopBar();
+  initTabSoma();
+  initTabAqeedah();
+  initTabAql();
+  initTabNidal();
+  initTabWaqt();
+  initJournalParts();
+}
+
+/* ============================================================
+   TOP BAR
+============================================================ */
+function initTopBar() {
+  updateTopBarDial();
+  updateTopBarIrohQ();
+}
+
+function updateTopBarDial() {
+  const cap = ls('saaleh_os_capacity', { mode: 'Standard Day' });
+  const mode = cap.mode || 'Standard Day';
+  const md = MODE_DATA[mode] || MODE_DATA['Standard Day'];
+
+  // Calculate fill amount — Rest Protocol = most filled (100%), High = 25%
+  const fillMap = { 'Rest Protocol': 1, 'Minimum Viable Day': 0.75, 'Standard Day': 0.5, 'High Capacity Day': 0.25 };
+  const fill = fillMap[mode] || 0.5;
+  const circumference = 150.796;
+  const offset = circumference * (1 - fill);
+
+  const arc = document.getElementById('dial-arc-top');
+  if (arc) { arc.setAttribute('stroke', md.color); arc.setAttribute('stroke-dashoffset', offset.toFixed(3)); }
+
+  const txt = document.getElementById('dial-text-top');
+  if (txt) txt.textContent = md.short;
+
+  document.getElementById('top-mode-name').textContent = mode;
+}
+
+function updateTopBarIrohQ() {
+  const idx = ls('saaleh_os_iroh_question_idx', dayOfYear() % 12);
+  document.getElementById('top-iroh-q').textContent = IROH_QUESTIONS[idx];
+}
+
+/* ============================================================
+   TAB SWITCHING
+============================================================ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  // activate correct nav button
+  const tabNames = ['soma','aqeedah','aql','nidal','waqt'];
+  const idx = tabNames.indexOf(tab);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+  // Refresh tab data on switch
+  if (tab === 'soma') refreshSoma();
+  if (tab === 'aqeedah') refreshAqeedah();
+  if (tab === 'aql') refreshAql();
+  if (tab === 'nidal') refreshNidal();
+  if (tab === 'waqt') refreshWaqt();
+}
+
+/* ============================================================
+   TAB 1: SOMA
+============================================================ */
+function initTabSoma() {
+  buildSymptomGrid();
+  refreshSoma();
+}
+
+function buildSymptomGrid() {
+  const grid = document.getElementById('symptom-grid');
+  grid.innerHTML = '';
+  SYMPTOMS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'btn symptom-btn';
+    btn.textContent = s;
+    btn.dataset.symptom = s;
+    btn.onclick = () => toggleSymptom(s, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function refreshSoma() {
+  const cap = ls('saaleh_os_capacity', { pain: 5, fatigue: 5, brain_fog: 5, mode: 'Standard Day' });
+  const mode = cap.mode || 'Standard Day';
+  const md = MODE_DATA[mode] || MODE_DATA['Standard Day'];
+
+  // Update large dial
+  const fillMap = { 'Rest Protocol': 1, 'Minimum Viable Day': 0.75, 'Standard Day': 0.5, 'High Capacity Day': 0.25 };
+  const fill = fillMap[mode] || 0.5;
+  const circumference = 314.159;
+  const offset = circumference * (1 - fill);
+  const arc = document.getElementById('dial-arc-soma');
+  if (arc) { arc.setAttribute('stroke', md.color); arc.setAttribute('stroke-dashoffset', offset.toFixed(3)); }
+  document.getElementById('soma-dial-text').textContent = md.short + '\nDAY';
+
+  document.getElementById('soma-pain').textContent = cap.pain ?? 5;
+  document.getElementById('soma-fatigue').textContent = cap.fatigue ?? 5;
+  document.getElementById('soma-brainfog').textContent = cap.brain_fog ?? 5;
+
+  const banner = document.getElementById('soma-mode-banner');
+  banner.style.borderLeftColor = md.color;
+  banner.style.borderLeft = '4px solid ' + md.color;
+  document.getElementById('soma-mode-word').textContent = mode;
+  document.getElementById('soma-mode-word').style.color = md.color;
+  document.getElementById('soma-mode-sentence').textContent = md.sentence;
+
+  // Restore active symptoms
+  const activeSx = ls('saaleh_os_symptoms', []);
+  document.querySelectorAll('.symptom-btn').forEach(btn => {
+    btn.classList.toggle('selected', activeSx.includes(btn.dataset.symptom));
+  });
+
+  updatePracticeSuggestions();
+
+  // Rest log state
+  const restLog = ls('saaleh_os_rest_log', []);
+  const todayRested = restLog.some(r => r.date === todayStr());
+  const restBtn = document.getElementById('rest-log-btn');
+  if (todayRested) {
+    restBtn.classList.add('logged');
+    document.getElementById('rest-log-text').textContent = 'Rest recorded today. ✓';
+  }
+
+  // Update top bar dial
+  updateTopBarDial();
+}
+
+function toggleSymptom(symptom, btn) {
+  let active = ls('saaleh_os_symptoms', []);
+  if (active.includes(symptom)) {
+    active = active.filter(s => s !== symptom);
+    btn.classList.remove('selected');
+  } else {
+    active.push(symptom);
+    btn.classList.add('selected');
+  }
+  lsSet('saaleh_os_symptoms', active);
+  updatePracticeSuggestions();
+}
+
+function updatePracticeSuggestions() {
+  const cap = ls('saaleh_os_capacity', { mode: 'Standard Day' });
+  const mode = cap.mode || 'Standard Day';
+  const activeSx = ls('saaleh_os_symptoms', []);
+  const container = document.getElementById('practice-suggestions');
+  container.innerHTML = '';
+
+  const suggestions = [];
+
+  if (mode === 'Rest Protocol') {
+    if (activeSx.includes('POTS episode')) {
+      suggestions.push('Horizontal rest. Compression if available. No screens for 20 minutes.');
+      suggestions.push('Legs elevated. Hydration. Nothing is required of you.');
+    } else {
+      suggestions.push('Rest is the protocol. The body is the priority today.');
+      suggestions.push('One survival task only. Everything else waits.');
+    }
+  } else if (mode === 'Minimum Viable Day') {
+    if (activeSx.includes('Fatigue crash') || activeSx.includes('Fatigue')) {
+      suggestions.push('One short walk if possible. Otherwise: still counts.');
+      suggestions.push('Eat something. This is practice too.');
+    } else {
+      suggestions.push('Three things. Let Iroh choose them, not Fletcher.');
+      suggestions.push('Gentle pacing. Honour the minimum.');
+    }
+  } else if (mode === 'Standard Day') {
+    if (activeSx.length === 0) {
+      suggestions.push('Phase 1 focus window is open. Use it.');
+      suggestions.push('Morning movement before the screen.');
+    } else {
+      suggestions.push('Standard capacity with active symptoms. Pace accordingly.');
+      suggestions.push('Rest after each significant task block.');
+    }
+  } else if (mode === 'High Capacity Day') {
+    suggestions.push('Use this window wisely. Do the deep thing.');
+    suggestions.push('Protect tomorrow. High capacity today ≠ licence to exhaust.');
+  }
+
+  suggestions.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'practice-card';
+    div.textContent = s;
+    container.appendChild(div);
+  });
+}
+
+function logRest() {
+  const restLog = ls('saaleh_os_rest_log', []);
+  if (!restLog.some(r => r.date === todayStr())) {
+    restLog.push({ date: todayStr(), timestamp: Date.now() });
+    lsSet('saaleh_os_rest_log', restLog);
+  }
+  const btn = document.getElementById('rest-log-btn');
+  btn.classList.add('logged');
+  document.getElementById('rest-log-text').textContent = 'Rest recorded today. ✓';
+}
+
+/* ============================================================
+   UPDATE MODAL (re-run soma sliders)
+============================================================ */
+function openUpdateModal() {
+  const cap = ls('saaleh_os_capacity', { pain: 5, fatigue: 5, brain_fog: 5 });
+  document.getElementById('upd-pain-slider').value = cap.pain;
+  document.getElementById('upd-fatigue-slider').value = cap.fatigue;
+  document.getElementById('upd-brainfog-slider').value = cap.brain_fog;
+  updateUpdSlider('pain');
+  updateUpdSlider('fatigue');
+  updateUpdSlider('brainfog');
+  document.getElementById('update-modal').classList.remove('hidden');
+}
+
+function closeUpdateModal() {
+  document.getElementById('update-modal').classList.add('hidden');
+}
+
+function updateUpdSlider(which) {
+  const slider = document.getElementById('upd-' + which + '-slider');
+  const valEl = document.getElementById('upd-' + which + '-val');
+  if (slider && valEl) valEl.textContent = slider.value;
+  const p = +document.getElementById('upd-pain-slider').value;
+  const f = +document.getElementById('upd-fatigue-slider').value;
+  const b = +document.getElementById('upd-brainfog-slider').value;
+  const mode = getCapacityMode((p + f + b) / 3);
+  document.getElementById('upd-cap-mode').textContent = mode;
+}
+
+function saveUpdatedReadings() {
+  const p = +document.getElementById('upd-pain-slider').value;
+  const f = +document.getElementById('upd-fatigue-slider').value;
+  const b = +document.getElementById('upd-brainfog-slider').value;
+  const mode = getCapacityMode((p + f + b) / 3);
+  lsSet('saaleh_os_capacity', { pain: p, fatigue: f, brain_fog: b, mode });
+  closeUpdateModal();
+  refreshSoma();
+}
+
+/* ============================================================
+   TAB 2: AQEEDAH
+============================================================ */
+function initTabAqeedah() {
+  buildSalahGrid();
+  buildWeeklyView();
+  renderAqeedahInsights();
+  refreshAqeedah();
+}
+
+function buildSalahGrid() {
+  const grid = document.getElementById('salah-grid');
+  grid.innerHTML = '';
+  PRAYERS.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'salah-item';
+    const circle = document.createElement('button');
+    circle.className = 'salah-circle';
+    circle.id = 'salah-' + p.toLowerCase();
+    circle.setAttribute('aria-label', p);
+    circle.onclick = () => toggleSalah(p);
+    const label = document.createElement('div');
+    label.className = 'salah-label';
+    label.textContent = p;
+    item.appendChild(circle);
+    item.appendChild(label);
+    grid.appendChild(item);
+  });
+}
+
+function refreshAqeedah() {
+  const key = 'saaleh_os_salah_' + todayStr();
+  const salah = ls(key, {});
+
+  PRAYERS.forEach(p => {
+    const el = document.getElementById('salah-' + p.toLowerCase());
+    if (el) el.classList.toggle('offered', !!salah[p.toLowerCase()]);
+  });
+
+  // Dispensations based on mode (Shafi'i fiqh)
+  renderSalahDispensations();
+
+  buildWeeklyView();
+  restoreQuranState();
+  restoreDhikr();
+}
+
+function toggleSalah(prayer) {
+  const key = 'saaleh_os_salah_' + todayStr();
+  const salah = ls(key, {});
+  const p = prayer.toLowerCase();
+  salah[p] = !salah[p];
+  lsSet(key, salah);
+  const el = document.getElementById('salah-' + p);
+  if (el) el.classList.toggle('offered', !!salah[p]);
+  buildWeeklyView();
+}
+
+function buildWeeklyView() {
+  const container = document.getElementById('weekly-view');
+  container.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const key = 'saaleh_os_salah_' + dateStr;
+    const salah = ls(key, {});
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'weekly-day';
+    const label = document.createElement('div');
+    label.className = 'weekly-day-label';
+    label.textContent = ['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()];
+    dayDiv.appendChild(label);
+    PRAYERS.forEach(p => {
+      const c = document.createElement('div');
+      c.className = 'weekly-circle' + (salah[p.toLowerCase()] ? ' offered' : '');
+      dayDiv.appendChild(c);
+    });
+    container.appendChild(dayDiv);
+  }
+}
+
+function toggleQuran(yes) {
+  lsSet('saaleh_os_quran_' + todayStr(), { sat: yes, surah: '', ayah: '' });
+  restoreQuranState();
+}
+
+function restoreQuranState() {
+  const q = ls('saaleh_os_quran_' + todayStr(), null);
+  const yesBtn = document.getElementById('quran-yes-btn');
+  const noBtn = document.getElementById('quran-no-btn');
+  const fields = document.getElementById('quran-fields');
+  if (q && q.sat === true) {
+    yesBtn.classList.add('selected');
+    noBtn.classList.remove('selected');
+    fields.style.display = 'flex';
+    document.getElementById('quran-surah').value = q.surah || '';
+    document.getElementById('quran-ayah').value = q.ayah || '';
+  } else if (q && q.sat === false) {
+    noBtn.classList.add('selected');
+    yesBtn.classList.remove('selected');
+    fields.style.display = 'none';
+  } else {
+    yesBtn.classList.remove('selected');
+    noBtn.classList.remove('selected');
+    fields.style.display = 'none';
+  }
+}
+
+function saveQuranData() {
+  const existing = ls('saaleh_os_quran_' + todayStr(), { sat: true });
+  existing.surah = document.getElementById('quran-surah').value;
+  existing.ayah = document.getElementById('quran-ayah').value;
+  lsSet('saaleh_os_quran_' + todayStr(), existing);
+}
+
+function toggleDhikr(which) {
+  const key = 'saaleh_os_dhikr_' + todayStr();
+  const dhikr = ls(key, {});
+  dhikr[which] = !dhikr[which];
+  lsSet(key, dhikr);
+  restoreDhikr();
+}
+
+function restoreDhikr() {
+  const dhikr = ls('saaleh_os_dhikr_' + todayStr(), {});
+  document.getElementById('dhikr-morning-btn').classList.toggle('active', !!dhikr.morning);
+  document.getElementById('dhikr-evening-btn').classList.toggle('active', !!dhikr.evening);
+}
+
+/* ============================================================
+   TAB 3: AQL
+============================================================ */
+function initTabAql() {
+  buildProjectsList();
+  renderAqlInsights();
+  refreshAql();
+}
+
+function refreshAql() {
+  const oneThing = ls('saaleh_os_one_thing', '');
+  document.getElementById('aql-one-thing').textContent = oneThing || '(No one thing set yet — run the morning check-in)';
+
+  const source = ls('saaleh_os_one_thing_source', null);
+  document.getElementById('source-iroh-btn').classList.toggle('selected', source === 'Iroh');
+  document.getElementById('source-fletcher-btn').classList.toggle('selected', source === 'Fletcher');
+
+  const msWork = ls('saaleh_os_ms_work', {});
+  document.getElementById('ms-client').value = msWork.client || '';
+  document.getElementById('ms-azure-trend').value = msWork.azure_trend || '';
+  document.getElementById('ms-narrative').value = msWork.narrative || '';
+
+  const masking = ls('saaleh_os_masking', {});
+  document.getElementById('masking-hours').value = masking.hours ?? '';
+  document.getElementById('decomp-yes-btn').classList.toggle('selected', masking.decomp === true);
+  document.getElementById('decomp-no-btn').classList.toggle('selected', masking.decomp === false);
+  updateMaskingWarning();
+
+  buildProjectsList();
+  checkFrodoWarning();
+}
+
+function setSource(src) {
+  lsSet('saaleh_os_one_thing_source', src);
+  document.getElementById('source-iroh-btn').classList.toggle('selected', src === 'Iroh');
+  document.getElementById('source-fletcher-btn').classList.toggle('selected', src === 'Fletcher');
+}
+
+function saveMSWork() {
+  lsSet('saaleh_os_ms_work', {
+    client: document.getElementById('ms-client').value,
+    azure_trend: document.getElementById('ms-azure-trend').value,
+    narrative: document.getElementById('ms-narrative').value
+  });
+}
+
+function buildProjectsList() {
+  const projects = ls('saaleh_os_projects', []);
+  const container = document.getElementById('projects-list');
+  container.innerHTML = '';
+  projects.forEach((proj, idx) => {
+    const item = document.createElement('div');
+    item.className = 'project-item';
+    item.innerHTML = `
+      <div class="project-item-row" style="margin-bottom:8px;">
+        <input type="text" class="project-name" value="${escHtml(proj.name || '')}" placeholder="Project name"
+          onchange="updateProject(${idx},'name',this.value)" style="flex:1;" />
+        <button class="btn btn-danger-soft" style="flex-shrink:0;min-height:36px;padding:4px 10px;font-size:0.8rem;"
+          onclick="deleteProject(${idx})">✕</button>
+      </div>
+      <div style="margin-bottom:8px;">
+        <input type="text" value="${escHtml(proj.action || '')}" placeholder="Next physical action (one verb phrase)"
+          onchange="updateProject(${idx},'action',this.value)" style="width:100%;" />
+      </div>
+      <div class="project-item-row">
+        <div style="flex:1;">
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:4px;">Source</div>
+          <div class="energy-toggle">
+            <button class="energy-btn ${proj.source === 'Iroh' ? 'selected' : ''}"
+              onclick="updateProject(${idx},'source','Iroh');buildProjectsList();">Iroh</button>
+            <button class="energy-btn ${proj.source === 'Fletcher' ? 'selected' : ''}"
+              onclick="updateProject(${idx},'source','Fletcher');buildProjectsList();">Fletcher</button>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:4px;">Energy demand</div>
+          <div class="energy-toggle">
+            <button class="energy-btn ${proj.energy === 'low' ? 'selected' : ''}"
+              onclick="updateProject(${idx},'energy','low');buildProjectsList();">Low</button>
+            <button class="energy-btn ${proj.energy === 'medium' ? 'selected' : ''}"
+              onclick="updateProject(${idx},'energy','medium');buildProjectsList();">Med</button>
+            <button class="energy-btn ${proj.energy === 'high' ? 'selected' : ''}"
+              onclick="updateProject(${idx},'energy','high');buildProjectsList();">High</button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+  checkFrodoWarning();
+}
+
+function addProject() {
+  const projects = ls('saaleh_os_projects', []);
+  projects.push({ name: '', action: '', source: null, energy: null });
+  lsSet('saaleh_os_projects', projects);
+  buildProjectsList();
+}
+
+function updateProject(idx, field, value) {
+  const projects = ls('saaleh_os_projects', []);
+  if (projects[idx]) {
+    projects[idx][field] = value;
+    lsSet('saaleh_os_projects', projects);
+  }
+  if (field === 'source' || field === 'energy') {
+    buildProjectsList();
+    checkFrodoWarning();
+  }
+}
+
+function deleteProject(idx) {
+  const projects = ls('saaleh_os_projects', []);
+  projects.splice(idx, 1);
+  lsSet('saaleh_os_projects', projects);
+  buildProjectsList();
+}
+
+function checkFrodoWarning() {
+  const projects = ls('saaleh_os_projects', []);
+  const highCount = projects.filter(p => p.energy === 'high').length;
+  document.getElementById('frodo-warning').classList.toggle('hidden', highCount < 4);
+}
+
+function setDecomp(val) {
+  const masking = ls('saaleh_os_masking', {});
+  masking.decomp = val;
+  lsSet('saaleh_os_masking', masking);
+  document.getElementById('decomp-yes-btn').classList.toggle('selected', val === true);
+  document.getElementById('decomp-no-btn').classList.toggle('selected', val === false);
+  updateMaskingWarning();
+}
+
+function saveMasking() {
+  const masking = ls('saaleh_os_masking', {});
+  masking.hours = +document.getElementById('masking-hours').value;
+  lsSet('saaleh_os_masking', masking);
+  updateMaskingWarning();
+}
+
+function updateMaskingWarning() {
+  const masking = ls('saaleh_os_masking', {});
+  const shouldShow = masking.decomp === false && (masking.hours || 0) > 4;
+  document.getElementById('masking-warning').classList.toggle('hidden', !shouldShow);
+}
+
+/* ============================================================
+   TAB 4: NIDAL
+============================================================ */
+function initTabNidal() {
+  buildOrganisingList();
+  buildLinePositionsList();
+  renderNidalInsights();
+  refreshNidal();
+}
+
+function refreshNidal() {
+  const data = ls('saaleh_os_nidal_data', {});
+  document.getElementById('nidal-focus-dropdown').value = data.focus || 'Workers Guide';
+  document.getElementById('nidal-study-focus').value = data.study_focus || '';
+  document.getElementById('nidal-workers-q').value = data.workers_q || '';
+  document.getElementById('nidal-china-q').value = data.china_q || '';
+  document.getElementById('nidal-next-reading').value = data.next_reading || '';
+
+  const studyLog = ls('saaleh_os_study_log_' + todayStr(), null);
+  ['wg','china','both','not'].forEach(k => {
+    document.getElementById('studylog-' + k).classList.remove('selected');
+  });
+  if (studyLog) {
+    const map = { 'Workers Guide': 'wg', 'China': 'china', 'Both': 'both', 'Not yet': 'not' };
+    const btnKey = map[studyLog.what];
+    if (btnKey) document.getElementById('studylog-' + btnKey).classList.add('selected');
+    document.getElementById('study-emerged').value = studyLog.emerged || '';
+    updateStudyEmergedCount();
+  }
+
+  buildOrganisingList();
+  buildLinePositionsList();
+}
+
+function saveNidalData() {
+  lsSet('saaleh_os_nidal_data', {
+    focus: document.getElementById('nidal-focus-dropdown').value,
+    study_focus: document.getElementById('nidal-study-focus').value,
+    workers_q: document.getElementById('nidal-workers-q').value,
+    china_q: document.getElementById('nidal-china-q').value,
+    next_reading: document.getElementById('nidal-next-reading').value
+  });
+}
+
+function buildOrganisingList() {
+  const items = ls('saaleh_os_organising', [
+    'MAMUK work', 'BEAM', 'ERG work', 'Community organising'
+  ]);
+  const container = document.getElementById('organising-list');
+  container.innerHTML = '';
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'organising-item';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = item;
+    inp.onchange = () => {
+      const arr = ls('saaleh_os_organising', []);
+      arr[idx] = inp.value;
+      lsSet('saaleh_os_organising', arr);
+    };
+    const del = document.createElement('button');
+    del.className = 'btn btn-danger-soft';
+    del.style.cssText = 'min-height:36px;padding:4px 10px;font-size:0.8rem;flex-shrink:0;';
+    del.textContent = '✕';
+    del.onclick = () => {
+      const arr = ls('saaleh_os_organising', []);
+      arr.splice(idx, 1);
+      lsSet('saaleh_os_organising', arr);
+      buildOrganisingList();
+    };
+    row.appendChild(inp);
+    row.appendChild(del);
+    container.appendChild(row);
+  });
+}
+
+function addOrganising() {
+  const arr = ls('saaleh_os_organising', []);
+  arr.push('');
+  lsSet('saaleh_os_organising', arr);
+  buildOrganisingList();
+}
+
+function buildLinePositionsList() {
+  const items = ls('saaleh_os_line_positions', []);
+  const container = document.getElementById('line-positions-list');
+  container.innerHTML = '';
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'line-position-item';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = item;
+    inp.onchange = () => {
+      const arr = ls('saaleh_os_line_positions', []);
+      arr[idx] = inp.value;
+      lsSet('saaleh_os_line_positions', arr);
+    };
+    const del = document.createElement('button');
+    del.className = 'btn btn-danger-soft';
+    del.style.cssText = 'min-height:36px;padding:4px 10px;font-size:0.8rem;flex-shrink:0;';
+    del.textContent = '✕';
+    del.onclick = () => {
+      const arr = ls('saaleh_os_line_positions', []);
+      arr.splice(idx, 1);
+      lsSet('saaleh_os_line_positions', arr);
+      buildLinePositionsList();
+    };
+    row.appendChild(inp);
+    row.appendChild(del);
+    container.appendChild(row);
+  });
+}
+
+function addLinePosition() {
+  const arr = ls('saaleh_os_line_positions', []);
+  arr.push('');
+  lsSet('saaleh_os_line_positions', arr);
+  buildLinePositionsList();
+}
+
+function setStudyLog(what) {
+  const existing = ls('saaleh_os_study_log_' + todayStr(), {});
+  existing.what = what;
+  lsSet('saaleh_os_study_log_' + todayStr(), existing);
+  ['wg','china','both','not'].forEach(k => document.getElementById('studylog-' + k).classList.remove('selected'));
+  const map = { 'Workers Guide': 'wg', 'China': 'china', 'Both': 'both', 'Not yet': 'not' };
+  const key = map[what];
+  if (key) document.getElementById('studylog-' + key).classList.add('selected');
+}
+
+function limitStudyEmerged() {
+  const el = document.getElementById('study-emerged');
+  const words = el.value.trim().split(/\s+/).filter(Boolean);
+  if (words.length > 5) {
+    el.value = words.slice(0, 5).join(' ');
+  }
+  updateStudyEmergedCount();
+  const existing = ls('saaleh_os_study_log_' + todayStr(), {});
+  existing.emerged = el.value;
+  lsSet('saaleh_os_study_log_' + todayStr(), existing);
+}
+
+function updateStudyEmergedCount() {
+  const el = document.getElementById('study-emerged');
+  const words = el.value.trim().split(/\s+/).filter(w => w);
+  document.getElementById('study-emerged-count').textContent = words.length + ' / 5 words';
+}
+
+/* ============================================================
+   TAB 5: WAQT
+============================================================ */
+function initTabWaqt() {
+  renderWaqtInsights();
+  refreshWaqt();
+}
+
+function refreshWaqt() {
+  // Load anchors
+  const anchors = ls('saaleh_os_anchors', {
+    1: 'No WhatsApp until after the first focused block.',
+    2: 'One nutritious meal before decompression.',
+    3: 'Screens off at 9pm. Walk and talk out loud.'
+  });
+  document.getElementById('anchor-1').value = anchors[1] || '';
+  document.getElementById('anchor-2').value = anchors[2] || '';
+  document.getElementById('anchor-3').value = anchors[3] || '';
+
+  // Highlight current phase
+  updateCurrentPhase();
+
+  // Football
+  const waqt = ls('saaleh_os_waqt_data', {});
+  document.getElementById('football-question').value = waqt.football_q || '';
+  document.getElementById('lifedev-field').value = waqt.lifedev || '';
+
+  // Football lens
+  const lens = waqt.football_lens || null;
+  document.querySelectorAll('#football-lens-row .btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === lens);
+  });
+
+  // Deviation toggle
+  const devDays = ls('saaleh_os_deviation_days', []);
+  const isDevDay = devDays.includes(todayStr());
+  document.getElementById('deviation-toggle').checked = isDevDay;
+  applyDeviationStyle(isDevDay);
+}
+
+function updateCurrentPhase() {
+  // Calculate waking time — default 07:00
+  const now = new Date();
+  const wakingHour = 7;
+  const hoursSinceWaking = now.getHours() - wakingHour + now.getMinutes() / 60;
+
+  let currentPhase = 0;
+  if (hoursSinceWaking >= 0 && hoursSinceWaking < 8) currentPhase = 1;
+  else if (hoursSinceWaking >= 8 && hoursSinceWaking < 16) currentPhase = 2;
+  else currentPhase = 3;
+
+  const devDays = ls('saaleh_os_deviation_days', []);
+  const isDevDay = devDays.includes(todayStr());
+
+  [1, 2, 3].forEach(p => {
+    const el = document.getElementById('phase-band-' + p);
+    if (!el) return;
+    if (isDevDay) {
+      el.classList.add('deviation');
+      el.classList.remove('dim');
+    } else if (p === currentPhase) {
+      el.classList.remove('dim');
+      el.classList.remove('deviation');
+    } else {
+      el.classList.add('dim');
+      el.classList.remove('deviation');
+    }
+  });
+}
+
+function saveAnchors() {
+  lsSet('saaleh_os_anchors', {
+    1: document.getElementById('anchor-1').value,
+    2: document.getElementById('anchor-2').value,
+    3: document.getElementById('anchor-3').value
+  });
+}
+
+function setFootballLens(lens) {
+  const waqt = ls('saaleh_os_waqt_data', {});
+  waqt.football_lens = lens;
+  lsSet('saaleh_os_waqt_data', waqt);
+  document.querySelectorAll('#football-lens-row .btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === lens);
+  });
+}
+
+function saveWaqtData() {
+  const waqt = ls('saaleh_os_waqt_data', {});
+  waqt.football_q = document.getElementById('football-question').value;
+  waqt.lifedev = document.getElementById('lifedev-field').value;
+  lsSet('saaleh_os_waqt_data', waqt);
+}
+
+function toggleDeviation() {
+  const isChecked = document.getElementById('deviation-toggle').checked;
+  const devDays = ls('saaleh_os_deviation_days', []);
+  if (isChecked) {
+    if (!devDays.includes(todayStr())) devDays.push(todayStr());
+  } else {
+    const idx = devDays.indexOf(todayStr());
+    if (idx > -1) devDays.splice(idx, 1);
+  }
+  lsSet('saaleh_os_deviation_days', devDays);
+  applyDeviationStyle(isChecked);
+}
+
+function applyDeviationStyle(isDevDay) {
+  [1, 2, 3].forEach(p => {
+    const el = document.getElementById('phase-band-' + p);
+    if (el) {
+      el.classList.toggle('deviation', isDevDay);
+      if (!isDevDay) updateCurrentPhase();
+    }
+  });
+}
+
+/* ============================================================
+   JOURNAL
+============================================================ */
+function initJournalParts() {
+  const container = document.getElementById('journal-parts-tags');
+  container.innerHTML = '';
+  [...PARTS, 'Baymax'].forEach(p => {
+    const tag = document.createElement('button');
+    tag.className = 'part-tag';
+    tag.textContent = p;
+    tag.dataset.part = p;
+    tag.onclick = () => tag.classList.toggle('selected');
+    container.appendChild(tag);
+  });
+}
+
+function openJournal() {
+  document.getElementById('journal-overlay').classList.remove('hidden');
+  document.getElementById('journal-textarea').value = '';
+  document.querySelectorAll('.part-tag').forEach(t => t.classList.remove('selected'));
+}
+
+function closeJournal() {
+  document.getElementById('journal-overlay').classList.add('hidden');
+}
+
+function saveJournalEntry() {
+  const text = document.getElementById('journal-textarea').value.trim();
+  if (!text) { closeJournal(); return; }
+  const parts = [];
+  document.querySelectorAll('.part-tag.selected').forEach(t => parts.push(t.dataset.part));
+  const entries = ls('saaleh_os_journal', []);
+  entries.push({ date: todayStr(), timestamp: Date.now(), text, parts });
+  lsSet('saaleh_os_journal', entries);
+  closeJournal();
+}
+
+/* ============================================================
+   AZURE AI ACTION HANDLERS
+============================================================ */
+async function askAzureSoma() {
+  const el = document.getElementById('soma-azure-response');
+  el.textContent = 'Thinking...';
+  const cap = ls('saaleh_os_capacity', {});
+  const symptoms = ls('saaleh_os_symptoms_' + todayStr(), []);
+  const prompt = `My capacity today: pain ${cap.pain || '?'}/10, fatigue ${cap.fatigue || '?'}/10, brain fog ${cap.brain_fog || '?'}/10. Mode: ${cap.mode || 'unknown'}. Active symptoms: ${symptoms.join(', ') || 'none flagged'}. What gentle, capacity-adapted practices would you suggest for my body right now?`;
+  el.textContent = await askAzure(prompt, 'You are advising on physical self-care for someone with POTS, ME/CFS, fibromyalgia. Never suggest pushing through. Rest is always valid.');
+}
+
+async function askAzureFletcher() {
+  const el = document.getElementById('aql-fletcher-response');
+  el.textContent = 'Thinking...';
+  const masking = ls('saaleh_os_masking', {});
+  const projects = ls('saaleh_os_projects', []);
+  const highEnergy = projects.filter(p => p.energy === 'high').length;
+  const prompt = `I have ${projects.length} active projects (${highEnergy} high-energy). Masking hours today: ${masking.hours || 0}. Decompression scheduled: ${masking.decompression ? 'yes' : 'no'}. Is Fletcher (my perfectionist/overachiever part) driving right now? What would Iroh notice?`;
+  el.textContent = await askAzure(prompt, 'Detect whether the user\'s perfectionist "Fletcher" part is overdriving. Be compassionate. Name what you see without shaming.');
+}
+
+async function askAzureNidal() {
+  const el = document.getElementById('nidal-azure-response');
+  el.textContent = 'Thinking...';
+  const data = ls('saaleh_os_nidal_data', {});
+  const positions = ls('saaleh_os_line_positions', []);
+  const posText = positions.map(p => p.text || p).join('; ');
+  const prompt = `My current settled line positions: ${posText || '(none recorded)'}. My study focus: ${data.focus || 'Workers Guide'}. Current theoretical question: ${data.workersQ || '(none)'}. Steelman the strongest opposing argument to my current positions. Help me sharpen my analysis without abandoning principled positions.`;
+  el.textContent = await askAzure(prompt, 'You are a dialectical sparring partner for Marxist-Leninist political education. Steelman opposing positions rigorously and honestly. Never patronise. Never centrist-wash.');
+}
+
+async function reflectJournal() {
+  const el = document.getElementById('journal-reflect-response');
+  const text = document.getElementById('journal-textarea').value.trim();
+  if (!text) { el.textContent = 'Write something first, then reflect.'; return; }
+  el.textContent = 'Reflecting...';
+  const parts = [];
+  document.querySelectorAll('.part-tag.selected').forEach(t => parts.push(t.dataset.part));
+  const prompt = `Journal entry: "${text}". Tagged IFS parts: ${parts.join(', ') || 'none'}. Reflect on what this entry reveals. Which part might be speaking? What does this part need?`;
+  el.textContent = await askAzure(prompt, 'You are an IFS-informed reflective companion. Identify which internal part may be active. Be warm, curious, and non-pathologising. Use the user\'s own parts language (Fletcher, Frodo, Kilmonger, Iroh, Bojack, Zuko, Baymax).');
+}
+
+/* ============================================================
+   SHAFI'I DISPENSATIONS (AQEEDAH TAB)
+============================================================ */
+const SHAFII_DISPENSATIONS = {
+  'Rest Protocol': [
+    'Sitting prayer is valid if standing causes dizziness or pain (Shafi\'i: al-Majmu\').',
+    'Combining Dhuhr+Asr and Maghrib+Isha is permitted for illness (jam\' taqdim/ta\'khir).',
+    'Tayammum is valid when water use risks health deterioration.',
+    'Shortened recitation is sufficient — even Fatiha alone is valid.'
+  ],
+  'Minimum Viable Day': [
+    'Sitting prayer is valid when standing is a hardship (mashaqqa).',
+    'Combining prayers is a mercy — use it without guilt.',
+    'Shorter surahs after Fatiha are enough. Quality of presence over quantity.'
+  ],
+  'Standard Day': [],
+  'High Capacity Day': []
+};
+
+function renderSalahDispensations() {
+  const container = document.getElementById('salah-dispensations');
+  if (!container) return;
+  const cap = ls('saaleh_os_capacity', { mode: 'Standard Day' });
+  const mode = cap.mode || 'Standard Day';
+  const dispensations = SHAFII_DISPENSATIONS[mode] || [];
+  if (dispensations.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = dispensations.map(d =>
+    `<div style="font-size:0.8rem;color:var(--muted);padding:8px 10px;background:var(--surface);border-radius:6px;border-left:3px solid var(--gold);">${escHtml(d)}</div>`
+  ).join('');
+}
+
+/* ============================================================
+   UTILITY
+============================================================ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* Refresh phase highlight every minute in case app stays open */
+setInterval(updateCurrentPhase, 60000);
+
+</script>
+</body>
+</html>
